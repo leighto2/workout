@@ -3,6 +3,308 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cost Per Billable Hour & Profitability Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .input-highlight {
+            background-color: #FFFDE7; /* A light yellow */
+        }
+        .result-card {
+            transition: all 0.3s ease-in-out;
+        }
+        @media print {
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .no-print { display: none; }
+            section { box-shadow: none !important; border: 1px solid #e2e8f0 !important; page-break-inside: avoid; }
+            .container { padding: 0 !important; max-width: 100% !important; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-5xl">
+        <header class="text-center mb-8 flex flex-col sm:flex-row justify-between items-center">
+            <div>
+                <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">Dynamic Cost & Profitability Calculator</h1>
+                <p class="mt-2 text-lg text-gray-600">Model how changes in staffing, pay, loans, and hours affect your bottom line.</p>
+            </div>
+            <button id="printButton" class="no-print mt-4 sm:mt-0 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v6a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7V9h6v3z" clip-rule="evenodd" /></svg>
+                Print / Save as PDF
+            </button>
+        </header>
+
+        <div class="space-y-8">
+            <!-- Section 1: Annual Cost Summary -->
+            <section class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                <h2 class="text-2xl font-semibold text-gray-800 border-b pb-3 mb-4 flex items-center"><span class="bg-blue-500 text-white rounded-full h-8 w-8 text-lg font-bold flex items-center justify-center mr-3">1</span>Annual Cost Summary</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
+                    <div class="bg-gray-100 p-4 rounded-lg"><h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Employee Costs</h3><p id="totalEmployeeCost" class="text-2xl font-bold text-blue-600 mt-1"></p><p class="text-xs text-gray-500 mt-1">(Wages + All Burden)</p></div>
+                    <div class="bg-blue-100 p-4 rounded-lg border border-blue-200"><h3 class="text-sm font-medium text-blue-700 uppercase tracking-wider">Total Annual Costs</h3><p id="totalAnnualCost" class="text-2xl font-bold text-blue-800 mt-1"></p><p class="text-xs text-blue-600 mt-1">(All Business Costs)</p></div>
+                </div>
+            </section>
+
+            <!-- Section 2: Staffing & Pay Rates -->
+            <section class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                <h2 class="text-2xl font-semibold text-gray-800 border-b pb-3 mb-4 flex items-center"><span class="bg-green-500 text-white rounded-full h-8 w-8 text-lg font-bold flex items-center justify-center mr-3">2</span>Staffing & Pay Rates</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6">
+                    <!-- Billable Staff Container -->
+                    <div class="space-y-6 lg:col-span-2">
+                        <div id="billable-groups-container">
+                           <!-- JS will populate this -->
+                        </div>
+                        <button id="add-group-btn" class="no-print w-full bg-green-100 text-green-800 font-semibold py-2 px-4 rounded-lg hover:bg-green-200 transition duration-300 border border-green-200">
+                            + Add Billable Group
+                        </button>
+                    </div>
+                    <!-- Admin Staff -->
+                    <div class="space-y-4 rounded-lg border border-gray-200 p-4 lg:col-span-2">
+                        <h3 class="font-medium text-gray-800 text-lg">Administrative Staff</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                           <div><label for="numAdminEmployees" class="block text-sm font-medium text-gray-700">Number of Employees</label><input type="number" id="numAdminEmployees" value="2" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 input-highlight"></div>
+                           <div><label for="avgAdminPay" class="block text-sm font-medium text-gray-700">Avg. Hourly Pay Rate ($)</label><input type="number" id="avgAdminPay" value="25" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 input-highlight"></div>
+                           <div><label for="avgAdminHours" class="block text-sm font-medium text-gray-700">Avg. Hours per Week</label><input type="number" id="avgAdminHours" value="40" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 input-highlight"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 3: Burden, Overhead & Loans -->
+            <section class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                <h2 class="text-2xl font-semibold text-gray-800 border-b pb-3 mb-4 flex items-center"><span class="bg-orange-500 text-white rounded-full h-8 w-8 text-lg font-bold flex items-center justify-center mr-3">3</span>Company-Wide Rates & Costs</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                    <div><label for="payrollTaxRate" class="block text-sm font-medium text-gray-700">Payroll Tax Rate (%)</label><input type="number" id="payrollTaxRate" value="7.7" step="0.1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 input-highlight"></div>
+                    <div><label for="otherBurdenRate" class="block text-sm font-medium text-gray-700">Other Burden Rate (%)</label><input type="number" id="otherBurdenRate" value="11.0" step="0.1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 input-highlight"></div>
+                    <div><label for="fixedOverhead" class="block text-sm font-medium text-gray-700">Annual Fixed Overhead</label><input type="text" id="fixedOverhead" value="301046.62" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 input-highlight"></div>
+                    <div><label for="totalLoanPayments" class="block text-sm font-medium text-gray-700">Total Annual Loan Payments</label><input type="text" id="totalLoanPayments" value="47923.79" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 input-highlight"></div>
+                </div>
+            </section>
+
+            <!-- Section 4: Company-Wide Time Off -->
+             <section class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                <h2 class="text-2xl font-semibold text-gray-800 border-b pb-3 mb-4 flex items-center"><span class="bg-yellow-500 text-white rounded-full h-8 w-8 text-lg font-bold flex items-center justify-center mr-3">4</span>Company-Wide Time Off (Annual)</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-4">
+                     <div><label for="vacationDays" class="block text-sm font-medium text-gray-700">Vacation Days</label><input type="number" id="vacationDays" value="15" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 input-highlight"></div>
+                     <div><label for="holidayDays" class="block text-sm font-medium text-gray-700">Paid Public Holidays</label><input type="number" id="holidayDays" value="10" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 input-highlight"></div>
+                    <div><label for="sickDays" class="block text-sm font-medium text-gray-700">Sick / Personal Days</p></label><input type="number" id="sickDays" value="5" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 input-highlight"></div>
+                </div>
+            </section>
+            
+            <!-- Section 5: Profitability Analysis -->
+            <section class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                <h2 class="text-2xl font-semibold text-gray-800 border-b pb-3 mb-4 flex items-center"><span class="bg-purple-500 text-white rounded-full h-8 w-8 text-lg font-bold flex items-center justify-center mr-3">5</span>Profitability Analysis</h2>
+                <div class="space-y-6">
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                        <div><label for="targetBillRate" class="block text-sm font-medium text-gray-700">Primary Service Bill Rate ($/hr)</label><input type="number" id="targetBillRate" value="150" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 input-highlight"></div>
+                        <div><label for="travelBillRate" class="block text-sm font-medium text-gray-700">Billable Travel Rate ($/hr)</label><input type="number" id="travelBillRate" value="75" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 input-highlight"></div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                         <div class="bg-purple-50 p-4 rounded-lg text-center border border-purple-200"><h3 class="text-sm font-medium text-purple-700 uppercase tracking-wider">Overall Profit Margin</h3><p id="profitMargin" class="text-2xl font-bold text-purple-600 mt-1"></p></div>
+                        <div class="bg-purple-50 p-4 rounded-lg text-center border border-purple-200"><h3 class="text-sm font-medium text-purple-700 uppercase tracking-wider">Avg. Profit Per Service Hour</h3><p id="profitPerHour" class="text-2xl font-bold text-purple-600 mt-1"></p></div>
+                        <div class="bg-purple-50 p-4 rounded-lg text-center border border-purple-200"><h3 class="text-sm font-medium text-purple-700 uppercase tracking-wider">Total Annual Profit</h3><p id="totalAnnualProfit" class="text-2xl font-bold text-purple-600 mt-1"></p></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 6: Final Report -->
+            <section id="finalReport" class="bg-gray-800 text-white p-6 rounded-xl shadow-lg">
+                 <h2 class="text-2xl font-semibold text-white border-b border-gray-600 pb-3 mb-6 flex items-center"><span class="bg-white text-gray-800 rounded-full h-8 w-8 text-lg font-bold flex items-center justify-center mr-3">6</span>Final Cost & Hours Report</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white text-gray-900 rounded-lg p-6 flex flex-col items-center justify-center result-card"><h3 class="text-lg font-semibold text-gray-700 uppercase tracking-wider">True Cost Per Billable Hour</h3><p id="costPerHour" class="text-5xl lg:text-6xl font-bold text-green-600 my-2 result-value"></p><p class="text-sm text-gray-500">(Total Annual Costs / Total Service Hours)</p></div>
+                    <div class="space-y-4 my-auto">
+                        <div class="flex justify-between items-baseline"><span class="text-gray-300">Total Primary Service Hours:</span><span id="totalBillableHours" class="text-2xl font-bold text-green-300"></span></div>
+                        <div class="flex justify-between items-baseline"><span class="text-gray-300">Total Billable Travel Hours:</span><span id="totalTravelHours" class="text-lg font-medium text-white"></span></div>
+                         <div class="flex justify-between items-baseline"><span class="text-gray-300">Total Company Utilization:</span><span id="totalUtilization" class="text-lg font-medium text-white"></span></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+    
+    <!-- Template for Billable Groups -->
+    <template id="billable-group-template">
+        <div class="billable-group space-y-4 rounded-lg border border-gray-200 p-4 relative">
+            <button class="remove-group-btn no-print absolute top-2 right-2 text-gray-400 hover:text-red-500">&times;</button>
+            <input type="text" class="group-name text-lg font-medium border-0 border-b-2 border-dotted border-gray-300 focus:ring-0 focus:border-green-500" value="Billable Group">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div><label class="block text-sm font-medium text-gray-700"># of Employees</label><input type="number" class="num-employees mt-1 block w-full p-2 input-highlight" value="4"></div>
+                <div><label class="block text-sm font-medium text-gray-700">Avg. Pay/hr ($)</label><input type="number" class="avg-pay mt-1 block w-full p-2 input-highlight" value="40"></div>
+                <div><label class="block text-sm font-medium text-gray-700">Avg. Hours/wk</label><input type="number" class="avg-hours mt-1 block w-full p-2 input-highlight" value="40"></div>
+                <div><label class="block text-sm font-medium text-gray-700">Travel hrs/wk</label><input type="number" class="travel-hours mt-1 block w-full p-2 input-highlight" value="10"></div>
+                <div><label class="block text-sm font-medium text-gray-700">Other Non-Bill hrs/wk</label><input type="number" class="other-hours mt-1 block w-full p-2 input-highlight" value="4"></div>
+            </div>
+             <div class="group-hours-summary bg-gray-50 p-2 rounded-md text-xs"></div>
+        </div>
+    </template>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const billableGroupsContainer = document.getElementById('billable-groups-container');
+            const addGroupBtn = document.getElementById('add-group-btn');
+            const template = document.getElementById('billable-group-template');
+            
+            const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+            const number = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
+
+            function formatCurrency(el) {
+                let value = parseFloat(el.value.replace(/[^0-9.-]+/g,""));
+                if (isNaN(value)) { el.value = ''; } 
+                else { el.value = currency.format(value).replace(/\$/g, '');}
+            }
+
+            function unformatCurrency(el) {
+                el.value = el.value.replace(/[^0-9.-]+/g,"");
+            }
+
+            function createBillableGroup(values = {}) {
+                const clone = template.content.cloneNode(true);
+                const groupDiv = clone.querySelector('.billable-group');
+                
+                groupDiv.querySelector('.group-name').value = values.name || `Billable Group`;
+                groupDiv.querySelector('.num-employees').value = values.employees || 4;
+                groupDiv.querySelector('.avg-pay').value = values.pay || 40;
+                groupDiv.querySelector('.avg-hours').value = values.hours || 40;
+                groupDiv.querySelector('.travel-hours').value = values.travel || 10;
+                groupDiv.querySelector('.other-hours').value = values.other || 4;
+                
+                groupDiv.querySelector('.remove-group-btn').addEventListener('click', () => {
+                    groupDiv.remove();
+                    calculate();
+                });
+                
+                billableGroupsContainer.appendChild(clone);
+                calculate();
+            }
+
+            addGroupBtn.addEventListener('click', () => createBillableGroup());
+
+            function getInputs() {
+                const billableGroups = [];
+                document.querySelectorAll('.billable-group').forEach(group => {
+                    billableGroups.push({
+                        employees: parseFloat(group.querySelector('.num-employees').value) || 0,
+                        pay: parseFloat(group.querySelector('.avg-pay').value) || 0,
+                        hours: parseFloat(group.querySelector('.avg-hours').value) || 0,
+                        travel: parseFloat(group.querySelector('.travel-hours').value) || 0,
+                        other: parseFloat(group.querySelector('.other-hours').value) || 0,
+                        summaryElement: group.querySelector('.group-hours-summary'),
+                    });
+                });
+
+                return {
+                    billableGroups,
+                    numAdminEmployees: parseFloat(document.getElementById('numAdminEmployees').value) || 0,
+                    avgAdminPay: parseFloat(document.getElementById('avgAdminPay').value) || 0,
+                    avgAdminHours: parseFloat(document.getElementById('avgAdminHours').value) || 0,
+                    payrollTaxRate: parseFloat(document.getElementById('payrollTaxRate').value) / 100 || 0,
+                    otherBurdenRate: parseFloat(document.getElementById('otherBurdenRate').value) / 100 || 0,
+                    fixedOverhead: parseFloat(document.getElementById('fixedOverhead').value.replace(/[^0-9.-]+/g,"")) || 0,
+                    totalLoanPayments: parseFloat(document.getElementById('totalLoanPayments').value.replace(/[^0-9.-]+/g,"")) || 0,
+                    vacationDays: parseFloat(document.getElementById('vacationDays').value) || 0,
+                    holidayDays: parseFloat(document.getElementById('holidayDays').value) || 0,
+                    sickDays: parseFloat(document.getElementById('sickDays').value) || 0,
+                    targetBillRate: parseFloat(document.getElementById('targetBillRate').value) || 0,
+                    travelBillRate: parseFloat(document.getElementById('travelBillRate').value) || 0,
+                };
+            }
+
+            function calculate() {
+                const data = getInputs();
+
+                // Calculate Costs
+                let annualBillableWages = 0;
+                data.billableGroups.forEach(g => {
+                    annualBillableWages += g.employees * g.pay * g.hours * 52;
+                });
+                const annualAdminWages = data.numAdminEmployees * data.avgAdminPay * data.avgAdminHours * 52;
+                const totalGrossWages = annualBillableWages + annualAdminWages;
+                const totalEmployeeCost = totalGrossWages * (1 + data.payrollTaxRate + data.otherBurdenRate);
+                const totalAnnualCost = data.fixedOverhead + totalEmployeeCost + data.totalLoanPayments;
+
+                // Calculate Hours & Revenue
+                let totalBillableServiceHours = 0;
+                let totalBillableTravelHours = 0;
+                let totalPotentialHoursAll = 0;
+
+                const totalPtoDays = data.vacationDays + data.holidayDays + data.sickDays;
+                
+                data.billableGroups.forEach(g => {
+                    const totalPotentialHours = g.hours * 52;
+                    totalPotentialHoursAll += totalPotentialHours * g.employees;
+
+                    const ptoHours = totalPtoDays * (g.hours / 5); 
+                    const workingWeeks = 52 - (totalPtoDays / 5);
+                    const annualBillableTravelHours = g.travel * workingWeeks;
+                    const annualOtherNonBillableHours = g.other * workingWeeks;
+                    const billableServiceHoursPerEmployee = totalPotentialHours - ptoHours - annualBillableTravelHours - annualOtherNonBillableHours;
+                    
+                    totalBillableServiceHours += billableServiceHoursPerEmployee * g.employees;
+                    totalBillableTravelHours += annualBillableTravelHours * g.employees;
+
+                    // Update group summary
+                    g.summaryElement.innerHTML = `
+                        Avg Annual Hrs: <b>${number.format(totalPotentialHours)}</b> | 
+                        PTO: <b>-${number.format(ptoHours)}</b> | 
+                        Travel: <b>-${number.format(annualBillableTravelHours)}</b> |
+                        Other: <b>-${number.format(annualOtherNonBillableHours)}</b> = 
+                        <b class="text-teal-700">${number.format(billableServiceHoursPerEmployee)} Service Hrs</b>
+                    `;
+                });
+                
+                const serviceRevenue = totalBillableServiceHours * data.targetBillRate;
+                const travelRevenue = totalBillableTravelHours * data.travelBillRate;
+                const totalAnnualRevenue = serviceRevenue + travelRevenue;
+                const totalAnnualProfit = totalAnnualRevenue - totalAnnualCost;
+
+                // Final Metrics
+                const costPerHour = totalBillableServiceHours > 0 ? totalAnnualCost / totalBillableServiceHours : 0;
+                const profitPerHour = totalBillableServiceHours > 0 ? totalAnnualProfit / totalBillableServiceHours : 0;
+                const profitMargin = totalAnnualRevenue > 0 ? (totalAnnualProfit / totalAnnualRevenue) * 100 : 0;
+                const totalUtilization = totalPotentialHoursAll > 0 ? ((totalBillableServiceHours + totalBillableTravelHours) / totalPotentialHoursAll) * 100 : 0;
+
+                // Update UI
+                document.getElementById('totalEmployeeCost').textContent = currency.format(totalEmployeeCost);
+                document.getElementById('totalAnnualCost').textContent = currency.format(totalAnnualCost);
+                document.getElementById('costPerHour').textContent = currency.format(costPerHour);
+                document.getElementById('totalBillableHours').textContent = number.format(totalBillableServiceHours);
+                document.getElementById('totalTravelHours').textContent = `${number.format(totalBillableTravelHours)} hrs`;
+                document.getElementById('totalUtilization').textContent = `${totalUtilization.toFixed(1)}%`;
+                document.getElementById('profitMargin').textContent = `${profitMargin.toFixed(1)}%`;
+                document.getElementById('profitPerHour').textContent = currency.format(profitPerHour);
+                document.getElementById('totalAnnualProfit').textContent = currency.format(totalAnnualProfit);
+            }
+
+            document.querySelector('.container').addEventListener('input', calculate);
+            
+            ['fixedOverhead', 'totalLoanPayments'].forEach(id => {
+                 const el = document.getElementById(id);
+                 el.addEventListener('focus', () => unformatCurrency(el));
+                 el.addEventListener('blur', () => {
+                    formatCurrency(el);
+                    calculate();
+                });
+            });
+
+            document.getElementById('printButton').addEventListener('click', () => window.print());
+            
+            // Initial State
+            createBillableGroup({name: "High-Travel Team", employees: 2, pay: 45, hours: 40, travel: 12, other: 3 });
+            createBillableGroup({name: "Low-Travel Team", employees: 6, pay: 35, hours: 40, travel: 2, other: 5 });
+            
+            ['fixedOverhead', 'totalLoanPayments'].forEach(id => formatCurrency(document.getElementById(id)));
+            calculate();
+        });
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Integrated Performance Program</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chosen Palette: Calm Harmony (Slate Gray, White, Teal) -->
