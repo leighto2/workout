@@ -361,4 +361,297 @@
                         return `
                             <div>
                                 <div class="font-semibold text-teal-700">Core Finisher: ${item.sets} sets</div>
-                                 <ul
+                                 <ul class="list-disc list-inside ml-4 text-slate-700">
+                                    <li>${item.ex} (${item.reps} reps)</li>
+                                </ul>
+                                <div class="text-sm text-slate-500 ml-4">Rest: ${item.rest}</div>
+                            </div>`;
+                    }).join('');
+                    return `<div class="bg-slate-50 p-4 rounded-lg border border-slate-200">${supersetHtml}</div>`;
+                }
+
+                let rows = workout.plan.map(ex => `
+                    <tr>
+                        <td class="table-cell font-medium">${ex.ex}</td>
+                        <td class="table-cell text-center">${ex.sets}</td>
+                        <td class="table-cell text-center">${ex.reps}</td>
+                        <td class="table-cell text-center">${ex.rest}</td>
+                    </tr>
+                `).join('');
+                return `
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
+                                <tr>
+                                    <th class="table-cell">Exercise</th>
+                                    <th class="table-cell text-center">Sets</th>
+                                    <th class="table-cell text-center">Reps</th>
+                                    <th class="table-cell text-center">Rest</th>
+                                </tr>
+                            </thead>
+                            <tbody>${rows}</tbody>
+                        </table>
+                    </div>
+                `;
+            }
+
+            function createWorkoutCardHTML(workout, isPhase3 = false) {
+                return `
+                    <div class="bg-white p-4 rounded-lg shadow-md border border-slate-200 h-full">
+                        <h4 class="font-bold text-lg mb-3 text-slate-800">${workout.name}</h4>
+                        ${createWorkoutTableHTML(workout, isPhase3)}
+                    </div>
+                `;
+            }
+
+            function renderPhaseWorkouts() {
+                const phaseKey = `phase${currentPhase}`;
+                const phaseData = appData.workouts[phaseKey];
+                const container = document.getElementById('phase-details');
+                container.innerHTML = `
+                    <h3 class="text-xl font-bold text-slate-700 mb-4 lg:col-span-3">${phaseData.name}</h3>
+                    ${createWorkoutCardHTML(phaseData.workouts.A, currentPhase === 3)}
+                    ${createWorkoutCardHTML(phaseData.workouts.B, currentPhase === 3)}
+                    ${createWorkoutCardHTML(phaseData.workouts.C, currentPhase === 3)}
+                `;
+            }
+            
+            function renderTodayWorkout() {
+                const today = new Date();
+                const workoutKey = appData.weeklySchedule[today.getDay()];
+                const container = document.getElementById('today-workout-container');
+
+                let workoutData;
+                let workoutHtml = '';
+
+                if (workoutKey.startsWith('phase.')) {
+                    const day = workoutKey.split('.')[1];
+                    workoutData = appData.workouts.phase1.workouts[day];
+                    workoutHtml = `
+                        <h3 class="font-bold text-xl mb-1">Today's Plan: Full Body Workout ${day}</h3>
+                        <p class="text-slate-600 mb-4">${workoutData.name} (from Phase 1)</p>
+                        ${createWorkoutTableHTML(workoutData)}
+                    `;
+                } else {
+                    workoutData = appData.workouts[workoutKey];
+                    if (workoutKey === 'rest') {
+                        workoutHtml = `
+                            <h3 class="font-bold text-xl mb-1">${workoutData.name}</h3>
+                            <p class="text-slate-600">${workoutData.goal}</p>
+                        `;
+                    } else { // Cardio
+                         workoutHtml = `
+                            <h3 class="font-bold text-xl mb-1">${workoutData.name}</h3>
+                            <p class="text-sm text-slate-500 mb-2">${workoutData.type}</p>
+                            <p class="mb-4"><strong class="font-semibold text-slate-700">Goal:</strong> ${workoutData.goal}</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                <div class="bg-white p-3 rounded-md border"><strong>Duration:</strong> ${workoutData.duration}</div>
+                                <div class="bg-white p-3 rounded-md border"><strong>Intensity:</strong> ${workoutData.intensity}</div>
+                            </div>
+                            <h4 class="font-semibold mt-4 mb-2">Protocols:</h4>
+                            <ul class="list-disc list-inside space-y-1 text-slate-600">
+                                ${workoutData.protocols.map(p => `<li>${p}</li>`).join('')}
+                            </ul>
+                        `;
+                    }
+                }
+
+                const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+                const completedWorkouts = JSON.parse(localStorage.getItem('completedWorkouts') || '[]');
+                const isCompletedToday = completedWorkouts.includes(todayStr);
+
+                let buttonHtml = '';
+                if (workoutKey !== 'rest') {
+                    buttonHtml = `
+                        <div class="mt-6 text-center">
+                            <button id="mark-complete-btn" class="py-2 px-6 rounded-lg text-white font-semibold transition ${isCompletedToday ? 'bg-gray-400 cursor-not-allowed' : 'bg-teal-600 hover:bg-teal-700'}" ${isCompletedToday ? 'disabled' : ''}>
+                                ${isCompletedToday ? '✓ Completed' : 'Mark as Complete'}
+                            </button>
+                            <p id="completion-message" class="text-green-600 mt-2 h-5"></p>
+                        </div>
+                    `;
+                }
+
+                container.innerHTML = workoutHtml + buttonHtml;
+
+                if (workoutKey !== 'rest' && !isCompletedToday) {
+                    document.getElementById('mark-complete-btn').addEventListener('click', () => {
+                        const currentCompleted = JSON.parse(localStorage.getItem('completedWorkouts') || '[]');
+                        if (!currentCompleted.includes(todayStr)) {
+                            currentCompleted.push(todayStr);
+                            localStorage.setItem('completedWorkouts', JSON.stringify(currentCompleted));
+                        }
+                        
+                        const btn = document.getElementById('mark-complete-btn');
+                        btn.disabled = true;
+                        btn.innerHTML = '✓ Completed';
+                        btn.classList.add('bg-gray-400', 'cursor-not-allowed');
+                        btn.classList.remove('bg-teal-600', 'hover:bg-teal-700');
+
+                        const msg = document.getElementById('completion-message');
+                        msg.textContent = 'Great job! Workout logged.';
+                        setTimeout(() => { msg.textContent = '' }, 3000);
+                        
+                        renderCalendar(calendarDate.getFullYear(), calendarDate.getMonth());
+                    });
+                }
+            }
+
+            function renderPrinciples() {
+                const container = document.getElementById('principles-container');
+                container.innerHTML = appData.principles.map(p => `
+                    <details class="bg-slate-50 rounded-lg border border-slate-200 group">
+                        <summary class="p-4 font-semibold cursor-pointer list-none flex justify-between items-center">
+                            <span>${p.title}</span>
+                            <span class="text-teal-500 transform transition-transform duration-300 group-open:rotate-180">&#9660;</span>
+                        </summary>
+                        <div class="p-4 border-t border-slate-200 text-slate-600">
+                            <p>${p.content}</p>
+                        </div>
+                    </details>
+                `).join('');
+            }
+            
+            function renderCardioAndProtocols() {
+                const cardioContainer = document.getElementById('cardio-container');
+                const protocolsContainer = document.getElementById('protocols-container');
+                
+                cardioContainer.innerHTML = appData.cardioInfo.map(c => `
+                    <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                        <h4 class="font-bold text-lg mb-2">${c.title}</h4>
+                        <p class="text-slate-600">${c.content}</p>
+                    </div>
+                `).join('');
+
+                protocolsContainer.innerHTML = appData.protocols.map(p => `
+                    <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                        <h4 class="font-bold text-lg mb-2">${p.title}</h4>
+                        <p class="text-slate-600 mb-3">${p.content}</p>
+                        <ul class="space-y-2 text-sm text-slate-700">
+                            ${p.steps.map(s => `<li class="flex items-start"><span class="text-teal-500 mr-2 mt-1">&#10003;</span><span>${s}</span></li>`).join('')}
+                        </ul>
+                    </div>
+                `).join('');
+            }
+
+            function renderHeartRateChart() {
+                const ctx = document.getElementById('cardioChart').getContext('2d');
+                const maxHR = 186;
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['LISS (Zone 2)', 'HIIT (Work Interval)'],
+                        datasets: [{
+                            label: 'Target BPM',
+                            data: [121, 167], 
+                            backgroundColor: ['#2dd4bf', '#f43f5e'],
+                            borderColor: ['#14b8a6', '#e11d48'],
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Max Heart Rate',
+                            data: [maxHR, maxHR],
+                            backgroundColor: 'rgba(203, 213, 225, 0.5)',
+                            borderColor: '#94a3b8',
+                            borderWidth: 1,
+                            type: 'line',
+                            pointRadius: 0,
+                            borderDash: [5, 5]
+                        }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: { display: true, text: 'Target Beats Per Minute (BPM)' },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) { label += ': '; }
+                                        if (context.parsed.y !== null) { label += context.parsed.y + ' BPM'; }
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, max: maxHR + 14, title: { display: true, text: 'Heart Rate (BPM)' } }
+                        }
+                    }
+                });
+            }
+
+            function renderCalendar(year, month) {
+                const calendarContainer = document.getElementById('calendar-container');
+                const completedWorkouts = JSON.parse(localStorage.getItem('completedWorkouts') || '[]');
+                const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+                const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                const firstDay = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+                let html = `
+                    <div class="flex justify-between items-center mb-4">
+                        <button id="prev-month" class="p-2 rounded-full hover:bg-slate-200 w-10 h-10 flex items-center justify-center transition">&#9664;</button>
+                        <h3 class="text-xl font-bold text-slate-700">${monthNames[month]} ${year}</h3>
+                        <button id="next-month" class="p-2 rounded-full hover:bg-slate-200 w-10 h-10 flex items-center justify-center transition">&#9654;</button>
+                    </div>
+                    <div class="grid grid-cols-7 gap-1 md:gap-2 text-center font-semibold text-slate-600 text-sm">
+                        ${daysOfWeek.map(day => `<div>${day}</div>`).join('')}
+                    </div>
+                    <div class="grid grid-cols-7 gap-1 md:gap-2 mt-2 text-center text-sm">
+                `;
+
+                for (let i = 0; i < firstDay; i++) { html += `<div></div>`; }
+
+                const today = new Date();
+                const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    const isCompleted = completedWorkouts.includes(dateStr);
+                    const isToday = dateStr === todayStr;
+
+                    let cellClasses = 'p-2 rounded-lg flex flex-col justify-center items-center h-12 md:h-16 transition';
+                    if (isToday) {
+                        cellClasses += ' bg-teal-100 ring-2 ring-teal-500';
+                    } else if (isCompleted) {
+                        cellClasses += ' bg-green-100';
+                    } else {
+                        cellClasses += ' bg-slate-100'
+                    }
+
+                    html += `<div class="${cellClasses}">
+                                <span>${day}</span>
+                                ${isCompleted ? '<span class="text-green-600 text-xl mt-1">&#10004;</span>' : ''}
+                             </div>`;
+                }
+
+                html += `</div>`;
+                calendarContainer.innerHTML = html;
+
+                document.getElementById('prev-month').addEventListener('click', () => {
+                    calendarDate.setMonth(calendarDate.getMonth() - 1);
+                    renderCalendar(calendarDate.getFullYear(), calendarDate.getMonth());
+                });
+                document.getElementById('next-month').addEventListener('click', () => {
+                    calendarDate.setMonth(calendarDate.getMonth() + 1);
+                    renderCalendar(calendarDate.getFullYear(), calendarDate.getMonth());
+                });
+            }
+
+
+            // Initial Render
+            switchView('dashboard');
+            phaseButtons[0].classList.add('active');
+            renderTodayWorkout();
+            renderPhaseWorkouts();
+            renderPrinciples();
+            renderCardioAndProtocols();
+            renderHeartRateChart();
+            renderCalendar(calendarDate.getFullYear(), calendarDate.getMonth());
+        });
+    </script>
+</body>
+</html>
