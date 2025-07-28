@@ -3,18 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Integrated Performance Program</title>
+    <title>Upper/Lower Split Program</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chosen Palette: Calm Harmony (Slate Gray, White, Teal) -->
-    <!-- Application Structure Plan: A task-oriented SPA with a main navigation bar switching between distinct views: 1) A 'Dashboard' showing the user's workout for the current day. 2) A 'Full Program' explorer with interactive phase selectors. 3) A 'Principles' section with accordions explaining core concepts like Progressive Overload and TUT. 4) A 'Cardio & Protocols' view combining cardio info (with a visual chart) and warm-up/cool-down routines. 5) A 'Progress' view with a calendar to track completed workouts. This structure was chosen to prioritize immediate usability ('What do I do today?') while allowing for non-linear exploration of the program's details and adding a motivational tracking feature. -->
-    <!-- Visualization & Content Choices: 
-        - Report Info: Weekly Schedule -> Goal: Guide User Daily -> Viz: Dynamic 'Today's Workout' Card with 'Mark Complete' button -> Interaction: JS determines day of week, displays plan, and allows user to save completion to localStorage -> Justification: Provides immediate, actionable information and motivational feedback.
-        - Report Info: Completed Workouts -> Goal: Track Consistency -> Viz: Interactive Calendar -> Interaction: User can navigate months. JS reads from localStorage to display checkmarks on completed days. -> Justification: Provides a long-term visual record of adherence.
-        - Report Info: 12-Week Phased Program Tables -> Goal: Organize/Explore -> Viz: Tabbed/Button Interface for Phases & Grid of Workout Cards -> Interaction: User clicks a phase button (1, 2, or 3) and JS dynamically populates the view with the corresponding workouts. -> Justification: Breaks down a large amount of complex information into manageable, user-selected chunks.
-        - Report Info: Heart Rate Zones for LISS/HIIT -> Goal: Compare/Inform -> Viz: Bar Chart (Chart.js) -> Interaction: Visually displays Target vs. Max Heart Rate for each cardio type. -> Justification: A chart is more intuitive and impactful for comparing quantitative data than a text description alone.
-        - Report Info: Foundational Principles (TUT, Overload) -> Goal: Inform/Explain -> Viz: Accordion-style expandable sections -> Interaction: User clicks a title to reveal detailed text. -> Justification: Keeps the UI clean and prevents overwhelming the user with large blocks of text upon first view.
-        -> Library/Method: Vanilla JS for all state management and DOM manipulation. Chart.js for the cardio visualization. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body { font-family: 'Inter', sans-serif; }
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
@@ -26,15 +16,27 @@
             color: white;
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
         }
-        .phase-btn.active {
-            background-color: #14b8a6; /* teal-500 */
-            color: white;
-            font-weight: 600;
-        }
         .table-cell {
             padding: 0.75rem;
             vertical-align: top;
             border-bottom: 1px solid #e5e7eb;
+        }
+        .workout-section {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #cbd5e1;
+        }
+        .exercise-item {
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border-left: 4px solid #14b8a6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
     </style>
 </head>
@@ -43,15 +45,15 @@
     <div id="app" class="container mx-auto p-4 md:p-8 max-w-7xl">
 
         <header class="text-center mb-8">
-            <h1 class="text-4xl md:text-5xl font-bold text-slate-900">Integrated Performance Program</h1>
-            <p class="text-slate-600 mt-2 text-lg">Your 12-Week Full Body Protocol for Strength, Posture, and Conditioning</p>
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-900">Upper/Lower Split Program</h1>
+            <p class="text-slate-600 mt-2 text-lg">Your 6-Day Training Protocol with Dedicated Upper/Lower Focus</p>
         </header>
 
         <nav class="flex flex-wrap justify-center gap-2 md:gap-4 mb-8 sticky top-4 bg-slate-50/80 backdrop-blur-sm py-2 z-10">
             <button data-view="dashboard" class="nav-btn active text-sm md:text-base font-semibold py-2 px-4 rounded-full bg-white shadow-sm hover:bg-teal-500 hover:text-white">Today's Workout</button>
-            <button data-view="program" class="nav-btn text-sm md:text-base font-semibold py-2 px-4 rounded-full bg-white shadow-sm hover:bg-teal-500 hover:text-white">Full Program</button>
-            <button data-view="principles" class="nav-btn text-sm md:text-base font-semibold py-2 px-4 rounded-full bg-white shadow-sm hover:bg-teal-500 hover:text-white">Core Principles</button>
-            <button data-view="cardio" class="nav-btn text-sm md:text-base font-semibold py-2 px-4 rounded-full bg-white shadow-sm hover:bg-teal-500 hover:text-white">Cardio & Protocols</button>
+            <button data-view="program" class="nav-btn text-sm md:text-base font-semibold py-2 px-4 rounded-full bg-white shadow-sm hover:bg-teal-500 hover:text-white">Weekly Schedule</button>
+            <button data-view="exercises" class="nav-btn text-sm md:text-base font-semibold py-2 px-4 rounded-full bg-white shadow-sm hover:bg-teal-500 hover:text-white">Exercise Guide</button>
+            <button data-view="hiit" class="nav-btn text-sm md:text-base font-semibold py-2 px-4 rounded-full bg-white shadow-sm hover:bg-teal-500 hover:text-white">HIIT & Stretching</button>
             <button data-view="progress" class="nav-btn text-sm md:text-base font-semibold py-2 px-4 rounded-full bg-white shadow-sm hover:bg-teal-500 hover:text-white">Progress</button>
         </nav>
 
@@ -59,55 +61,38 @@
             <!-- Dashboard View -->
             <div id="dashboard" class="view active">
                 <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200">
-                    <h2 class="text-2xl font-bold mb-1 text-teal-600">Dashboard</h2>
-                    <p class="text-slate-600 mb-6">Welcome to your performance dashboard. This view automatically displays the scheduled activity for today, providing immediate focus for your training. Whether it's a specific full body workout, a cardio session, or a much-needed rest day, your plan is laid out here to get you started without delay.</p>
+                    <h2 class="text-2xl font-bold mb-1 text-teal-600">Today's Training</h2>
+                    <p class="text-slate-600 mb-6">Your customized workout for today. Each session includes a 20-minute treadmill warm-up followed by targeted strength training and finisher work.</p>
                     <div id="today-workout-container" class="bg-slate-50 p-6 rounded-lg border border-slate-200"></div>
                 </div>
             </div>
 
-            <!-- Full Program View -->
+            <!-- Program View -->
             <div id="program" class="view">
-                 <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200">
-                    <h2 class="text-2xl font-bold mb-1 text-teal-600">The 12-Week Plan</h2>
-                    <p class="text-slate-600 mb-6">Explore the entire 12-week periodized program here. The plan is divided into three distinct 4-week phases, each with a unique focus to prevent plateaus and drive continuous progress. Select a phase below to view the detailed full body workouts (A, B, and C) for that block. Each workout targets all major muscle groups while maintaining the 2:1 pull/push ratio for postural correction. This progression moves from hypertrophy and tempo mastery, through strength intensification, to final performance and metabolic conditioning.</p>
-                    <div class="flex justify-center gap-2 mb-6">
-                        <button data-phase="1" class="phase-btn py-2 px-5 rounded-md bg-slate-200 hover:bg-teal-400 hover:text-white transition">Phase 1</button>
-                        <button data-phase="2" class="phase-btn py-2 px-5 rounded-md bg-slate-200 hover:bg-teal-400 hover:text-white transition">Phase 2</button>
-                        <button data-phase="3" class="phase-btn py-2 px-5 rounded-md bg-slate-200 hover:bg-teal-400 hover:text-white transition">Phase 3</button>
-                    </div>
-                    <div id="phase-details" class="grid grid-cols-1 lg:grid-cols-3 gap-6"></div>
-                </div>
-            </div>
-
-            <!-- Principles View -->
-            <div id="principles" class="view">
                 <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200">
-                    <h2 class="text-2xl font-bold mb-1 text-teal-600">Core Training Principles</h2>
-                     <p class="text-slate-600 mb-6">Understanding the 'why' behind your training is crucial for long-term success. This section breaks down the foundational scientific principles that this program is built upon. Interacting with these concepts—from the mechanics of muscle growth to the specifics of postural correction—will empower you to train with greater intent and effectiveness. Click each principle to learn more.</p>
-                    <div id="principles-container" class="space-y-4"></div>
+                    <h2 class="text-2xl font-bold mb-1 text-teal-600">Weekly Training Schedule</h2>
+                    <p class="text-slate-600 mb-6">A comprehensive 6-day upper/lower split designed to maximize muscle development and strength gains. Each workout targets specific muscle groups with appropriate volume and intensity.</p>
+                    <div id="weekly-schedule" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
                 </div>
             </div>
 
-            <!-- Cardio & Protocols View -->
-            <div id="cardio" class="view">
-                 <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200">
-                    <h2 class="text-2xl font-bold mb-1 text-teal-600">Cardio & Protocols</h2>
-                    <p class="text-slate-600 mb-6">Effective training is about more than just lifting. This section details the complete supportive structure of your program: cardiovascular conditioning, dynamic warm-ups, and post-workout cool-downs. Here you can compare the different cardio styles used in the program, understand their unique benefits via the chart, and access the specific warm-up and stretching routines that are essential for performance and injury prevention.</p>
+            <!-- Exercise Guide View -->
+            <div id="exercises" class="view">
+                <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200">
+                    <h2 class="text-2xl font-bold mb-1 text-teal-600">Exercise Guide & Tips</h2>
+                    <p class="text-slate-600 mb-6">Key form cues and exercise variations to ensure safe, effective training and continuous progression.</p>
+                    <div id="exercise-guide-container" class="space-y-4"></div>
+                </div>
+            </div>
+
+            <!-- HIIT & Stretching View -->
+            <div id="hiit" class="view">
+                <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200">
+                    <h2 class="text-2xl font-bold mb-1 text-teal-600">HIIT & Recovery Protocols</h2>
+                    <p class="text-slate-600 mb-6">High-intensity interval training and comprehensive stretching routines for optimal recovery and conditioning.</p>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <div>
-                            <h3 class="text-xl font-bold mb-4">Cardiovascular Conditioning</h3>
-                            <div id="cardio-container" class="space-y-6"></div>
-                             <div class="mt-8">
-                                <h3 class="text-xl font-bold mb-4">Target Heart Rate Zones (34 y/o Male)</h3>
-                                <div class="chart-container relative h-72 w-full max-w-md mx-auto">
-                                    <canvas id="cardioChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <h3 class="text-xl font-bold mb-4">Mobility & Recovery Protocols</h3>
-                            <div id="protocols-container" class="space-y-6"></div>
-                        </div>
+                        <div id="hiit-container"></div>
+                        <div id="stretching-container"></div>
                     </div>
                 </div>
             </div>
@@ -116,210 +101,253 @@
             <div id="progress" class="view">
                 <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200">
                     <h2 class="text-2xl font-bold mb-1 text-teal-600">Your Progress Calendar</h2>
-                    <p class="text-slate-600 mb-6">This calendar tracks your completed workouts. A checkmark indicates a day you've successfully logged a session. Stay consistent!</p>
+                    <p class="text-slate-600 mb-6">Track your completed workouts and maintain consistency with your training schedule.</p>
                     <div id="calendar-container"></div>
                 </div>
             </div>
         </main>
-
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const appData = {
                 workouts: {
-                    phase1: {
-                        name: 'Phase 1: Hypertrophy & Tempo Mastery (Wks 1-4)',
-                        workouts: {
-                            A: {
-                                name: 'Monday - Full Body A',
-                                plan: [
-                                    { ex: 'Barbell Back Squat', sets: '3', reps: '8-10', tempo: '3-1-1-0', rest: '120s' },
-                                    { ex: 'Barbell Bench Press', sets: '3', reps: '8-10', tempo: '3-1-1-0', rest: '90s' },
-                                    { ex: 'Barbell Bent-Over Row', sets: '3', reps: '8-10', tempo: '3-1-1-0', rest: '90s' },
-                                    { ex: 'Overhead Press (Dumbbell)', sets: '3', reps: '10-12', tempo: '3-1-1-0', rest: '60s' },
-                                    { ex: 'Romanian Deadlift', sets: '3', reps: '10-12', tempo: '3-1-1-0', rest: '90s' },
-                                    { ex: 'Plank', sets: '3', reps: '45-60s hold', tempo: 'N/A', rest: '45s' },
-                                ]
-                            },
-                            B: {
-                                name: 'Wednesday - Full Body B',
-                                plan: [
-                                    { ex: 'Deadlift (Conventional)', sets: '3', reps: '8-10', tempo: 'Controlled', rest: '120s' },
-                                    { ex: 'Dumbbell Incline Press', sets: '3', reps: '10-12', tempo: '3-1-1-0', rest: '90s' },
-                                    { ex: 'Pull-ups (or Lat Pulldowns)', sets: '3', reps: '8-10', tempo: '3-1-1-0', rest: '90s' },
-                                    { ex: 'Bulgarian Split Squat', sets: '3', reps: '10-12/leg', tempo: '3-1-1-0', rest: '60s' },
-                                    { ex: 'Seated Cable Row', sets: '3', reps: '12-15', tempo: '3-1-1-0', rest: '60s' },
-                                    { ex: 'Pallof Press', sets: '3', reps: '12-15/side', tempo: '3-1-1-0', rest: '45s' },
-                                ]
-                            },
-                            C: {
-                                name: 'Friday - Full Body C',
-                                plan: [
-                                    { ex: 'Front Squat (or Goblet Squat)', sets: '3', reps: '8-10', tempo: '3-1-1-0', rest: '120s' },
-                                    { ex: 'Push-ups (or Dumbbell Press)', sets: '3', reps: '10-12', tempo: '3-1-1-0', rest: '90s' },
-                                    { ex: 'Single-Arm Dumbbell Row', sets: '3', reps: '10-12/arm', tempo: '3-1-1-0', rest: '60s' },
-                                    { ex: 'Overhead Press (Barbell)', sets: '3', reps: '8-10', tempo: '3-1-1-0', rest: '90s' },
-                                    { ex: 'Lying Hamstring Curl', sets: '3', reps: '12-15', tempo: '3-1-1-0', rest: '60s' },
-                                    { ex: 'Face Pulls', sets: '3', reps: '15-20', tempo: '2-1-1-1', rest: '45s' },
-                                ]
-                            }
+                    monday: {
+                        name: 'Monday: Upper Body + Core',
+                        type: 'Upper Body',
+                        warmup: {
+                            name: 'Treadmill Warm-up',
+                            duration: '20 minutes',
+                            details: 'Moderate pace (3.0-3.5 mph) with slight incline'
+                        },
+                        strength: {
+                            name: 'Strength Training',
+                            duration: '45-50 minutes',
+                            exercises: [
+                                { ex: 'Barbell Bench Press', sets: '4', reps: '8-10', notes: 'Focus on controlled tempo' },
+                                { ex: 'Bent-Over Barbell Rows', sets: '4', reps: '8-10', notes: 'Keep back straight, pull to sternum' },
+                                { ex: 'Overhead Press', sets: '3', reps: '10-12', notes: 'Standing or seated' },
+                                { ex: 'Pull-ups/Lat Pulldowns', sets: '3', reps: '8-12', notes: 'Full range of motion' },
+                                { ex: 'Dumbbell Incline Press', sets: '3', reps: '10-12', notes: '30-45 degree incline' },
+                                { ex: 'Dumbbell Rows', sets: '3', reps: '10-12 each arm', notes: 'Single arm, supported' },
+                                { ex: 'Tricep Dips/Close-Grip Press', sets: '3', reps: '10-15', notes: 'Full range of motion' },
+                                { ex: 'Barbell Curls', sets: '3', reps: '10-12', notes: 'Controlled movement' }
+                            ]
+                        },
+                        finisher: {
+                            name: 'Core Circuit',
+                            duration: '10 minutes',
+                            exercises: [
+                                { ex: 'Plank', sets: '3', reps: '45-60 seconds', notes: 'Maintain straight line' },
+                                { ex: 'Russian Twists', sets: '3', reps: '20 each side', notes: 'Feet off ground' },
+                                { ex: 'Dead Bug', sets: '3', reps: '10 each side', notes: 'Keep lower back flat' },
+                                { ex: 'Mountain Climbers', sets: '3', reps: '20 total', notes: 'Fast tempo' }
+                            ]
                         }
                     },
-                    phase2: {
-                        name: 'Phase 2: Strength Intensification (Wks 5-8)',
-                        workouts: {
-                            A: {
-                                name: 'Monday - Full Body A',
-                                plan: [
-                                    { ex: 'Barbell Back Squat', sets: '4', reps: '5-8', tempo: 'Controlled', rest: '120-150s' },
-                                    { ex: 'Barbell Bench Press', sets: '4', reps: '5-8', tempo: 'Controlled', rest: '120-150s' },
-                                    { ex: 'Barbell Bent-Over Row', sets: '4', reps: '5-8', tempo: 'Controlled', rest: '120s' },
-                                    { ex: 'Romanian Deadlift', sets: '3', reps: '8-10', tempo: '3-1-1-0', rest: '90s' },
-                                    { ex: 'Weighted Dips (or CGBP)', sets: '3', reps: '6-10', tempo: '3-1-1-0', rest: '90s' },
-                                    { ex: 'Hanging Leg Raise', sets: '3', reps: 'To Failure', tempo: 'N/A', rest: '60s' },
-                                ]
-                            },
-                            B: {
-                                name: 'Wednesday - Full Body B',
-                                plan: [
-                                    { ex: 'Deadlift (Conventional)', sets: '4', reps: '5', tempo: 'Controlled', rest: '150-180s' },
-                                    { ex: 'Overhead Press (Barbell)', sets: '4', reps: '5-8', tempo: 'Controlled', rest: '120s' },
-                                    { ex: 'Weighted Pull-ups (or Pulldowns)', sets: '4', reps: '5-8', tempo: 'Controlled', rest: '120s' },
-                                    { ex: 'Pause Squat', sets: '3', reps: '5', tempo: '2-2-X-0', rest: '120s' },
-                                    { ex: 'T-Bar Row', sets: '3', reps: '8-10', tempo: '3-1-1-0', rest: '90s' },
-                                    { ex: 'Side Plank', sets: '3', reps: '45-60s/side', tempo: 'N/A', rest: '45s' },
-                                ]
-                            },
-                            C: {
-                                name: 'Friday - Full Body C',
-                                plan: [
-                                    { ex: 'Front Squat', sets: '3', reps: '6-8', tempo: 'Controlled', rest: '120s' },
-                                    { ex: 'Incline Barbell Press', sets: '4', reps: '6-8', tempo: 'Controlled', rest: '120s' },
-                                    { ex: 'Chest-Supported Row', sets: '4', reps: '8-10', tempo: '3-1-1-0', rest: '90s' },
-                                    { ex: 'Landmine Press', sets: '3', reps: '8-10/arm', tempo: '3-1-1-0', rest: '60s' },
-                                    { ex: 'Glute-Ham Raise (or Hip Thrusts)', sets: '3', reps: '8-12', tempo: '2-1-1-1', rest: '90s' },
-                                    { ex: 'Renegade Row', sets: '3', reps: '8-10/side', tempo: 'Controlled', rest: '60s' },
-                                ]
-                            }
+                    tuesday: {
+                        name: 'Tuesday: Lower Body + Lower Back',
+                        type: 'Lower Body',
+                        warmup: {
+                            name: 'Treadmill Warm-up',
+                            duration: '20 minutes',
+                            details: 'Moderate pace (3.0-3.5 mph) with slight incline'
+                        },
+                        strength: {
+                            name: 'Strength Training',
+                            duration: '45-50 minutes',
+                            exercises: [
+                                { ex: 'Barbell Squats', sets: '4', reps: '8-10', notes: 'Deep squat, knees track over toes' },
+                                { ex: 'Romanian Deadlifts', sets: '4', reps: '8-10', notes: 'Hip hinge movement' },
+                                { ex: 'Bulgarian Split Squats', sets: '3', reps: '10-12 each leg', notes: 'Rear foot elevated' },
+                                { ex: 'Hip Thrusts', sets: '3', reps: '12-15', notes: 'Squeeze glutes at top' },
+                                { ex: 'Walking Lunges', sets: '3', reps: '12 each leg', notes: 'Step forward, sink down' },
+                                { ex: 'Calf Raises', sets: '3', reps: '15-20', notes: 'Full range of motion' },
+                                { ex: 'Leg Curls', sets: '3', reps: '12-15', notes: 'Lying or seated' },
+                                { ex: 'Glute Bridges', sets: '3', reps: '15-20', notes: 'Two feet on ground' }
+                            ]
+                        },
+                        finisher: {
+                            name: 'Lower Back Focus',
+                            duration: '10 minutes',
+                            exercises: [
+                                { ex: 'Good Mornings', sets: '3', reps: '12-15', notes: 'Light weight, hip hinge' },
+                                { ex: 'Hyperextensions', sets: '3', reps: '12-15', notes: 'Controlled movement' },
+                                { ex: 'Bird Dog', sets: '3', reps: '10 each side', notes: 'Opposite arm/leg' }
+                            ]
                         }
                     },
-                    phase3: {
-                        name: 'Phase 3: Performance & Metabolic Conditioning (Wks 9-12)',
-                        workouts: {
-                           A: {
-                                name: 'Monday - Full Body A',
-                                plan: [
-                                    { type: 'superset', exercises: [ {ex: 'A1: Squat to Press (Dumbbell)', sets: '4', reps: '8-12' }, { ex: 'A2: Chest-Supported Row', sets: '4', reps: '10-15' }], rest: '60-75s after A2'},
-                                    { type: 'superset', exercises: [ {ex: 'B1: Push-up to T', sets: '3', reps: '8-12' }, { ex: 'B2: Romanian Deadlift', sets: '3', reps: '12-15' }], rest: '60s after B2'},
-                                    { type: 'finisher', ex: 'Mountain Climbers', sets: '4', reps: '15-20/side', rest: '45s' }
-                                ]
-                            },
-                            B: {
-                                name: 'Wednesday - Full Body B',
-                                plan: [
-                                    { type: 'superset', exercises: [ {ex: 'A1: Deadlift (Light)', sets: '4', reps: '10-12' }, { ex: 'A2: Incline Dumbbell Press', sets: '4', reps: '10-15' }], rest: '60-75s after A2'},
-                                    { type: 'superset', exercises: [ {ex: 'B1: Reverse Lunge', sets: '3', reps: '12-15/leg' }, { ex: 'B2: Lat Pulldown', sets: '3', reps: '12-15' }], rest: '60s after B2'},
-                                    { type: 'finisher', ex: 'Burpees', sets: '4', reps: '8-12', rest: '45s' }
-                                ]
-                            },
-                            C: {
-                                name: 'Friday - Full Body C',
-                                plan: [
-                                    { type: 'superset', exercises: [ {ex: 'A1: Goblet Squat', sets: '4', reps: '12-15' }, { ex: 'A2: Push-up Variations', sets: '4', reps: '8-15' }], rest: '60-75s after A2'},
-                                    { type: 'superset', exercises: [ {ex: 'B1: Single-Leg RDL', sets: '3', reps: '10-12/leg' }, { ex: 'B2: Face Pulls', sets: '3', reps: '15-20' }], rest: '60s after B2'},
-                                    { type: 'finisher', ex: 'Plank to Downward Dog', sets: '4', reps: '10-15', rest: '45s' }
-                                ]
-                            }
+                    wednesday: {
+                        name: 'Wednesday: Upper Body + Core (Variation)',
+                        type: 'Upper Body',
+                        warmup: {
+                            name: 'Treadmill Warm-up',
+                            duration: '20 minutes',
+                            details: 'Moderate pace (3.0-3.5 mph) with slight incline'
+                        },
+                        strength: {
+                            name: 'Strength Training',
+                            duration: '45-50 minutes',
+                            exercises: [
+                                { ex: 'Incline Barbell Press', sets: '4', reps: '8-10', notes: 'Instead of flat bench' },
+                                { ex: 'Bent-Over Barbell Rows', sets: '4', reps: '8-10', notes: 'Keep back straight' },
+                                { ex: 'Overhead Press', sets: '3', reps: '10-12', notes: 'Standing or seated' },
+                                { ex: 'Pull-ups/Lat Pulldowns', sets: '3', reps: '8-12', notes: 'Wide grip variation' },
+                                { ex: 'Cable Flyes', sets: '3', reps: '10-12', notes: 'Instead of dumbbell incline' },
+                                { ex: 'Dumbbell Rows', sets: '3', reps: '10-12 each arm', notes: 'Single arm, supported' },
+                                { ex: 'Face Pulls', sets: '3', reps: '12-15', notes: 'Rear delt focus' },
+                                { ex: 'Hammer Curls', sets: '3', reps: '10-12', notes: 'Neutral grip' }
+                            ]
+                        },
+                        finisher: {
+                            name: 'Core Circuit',
+                            duration: '10 minutes',
+                            exercises: [
+                                { ex: 'Plank', sets: '3', reps: '45-60 seconds', notes: 'Maintain straight line' },
+                                { ex: 'Bicycle Crunches', sets: '3', reps: '20 each side', notes: 'Controlled movement' },
+                                { ex: 'Dead Bug', sets: '3', reps: '10 each side', notes: 'Keep lower back flat' },
+                                { ex: 'Mountain Climbers', sets: '3', reps: '20 total', notes: 'Fast tempo' }
+                            ]
                         }
                     },
-                    cardioLISS: {
-                        name: 'Cardio Day (LISS)',
-                        type: 'LISS (Low-Intensity Steady-State)',
-                        goal: 'Active Recovery, Aerobic Base Building',
-                        duration: '30-45 minutes',
-                        intensity: 'Zone 2: ~60-70% of Max HR (112-130 BPM)',
-                        protocols: [
-                            'Treadmill: Walk at 3.0-3.5 mph on a 5-10% incline.',
-                            'Bike/Rower: Cycle/Row at a steady, manageable pace.'
-                        ]
+                    thursday: {
+                        name: 'Thursday: Lower Body + Lower Back (Variation)',
+                        type: 'Lower Body',
+                        warmup: {
+                            name: 'Treadmill Warm-up',
+                            duration: '20 minutes',
+                            details: 'Moderate pace (3.0-3.5 mph) with slight incline'
+                        },
+                        strength: {
+                            name: 'Strength Training',
+                            duration: '45-50 minutes',
+                            exercises: [
+                                { ex: 'Front Squats', sets: '4', reps: '8-10', notes: 'Instead of back squats' },
+                                { ex: 'Sumo Deadlifts', sets: '4', reps: '8-10', notes: 'Wide stance, toes out' },
+                                { ex: 'Step-ups', sets: '3', reps: '10-12 each leg', notes: 'Instead of Bulgarian splits' },
+                                { ex: 'Hip Thrusts', sets: '3', reps: '12-15', notes: 'Single leg variation' },
+                                { ex: 'Reverse Lunges', sets: '3', reps: '12 each leg', notes: 'Step back, control descent' },
+                                { ex: 'Seated Calf Raises', sets: '3', reps: '15-20', notes: 'Different angle' },
+                                { ex: 'Nordic Curls (or Leg Curls)', sets: '3', reps: '8-12', notes: 'Eccentric focus' },
+                                { ex: 'Single Leg Glute Bridges', sets: '3', reps: '12-15 each', notes: 'Unilateral work' }
+                            ]
+                        },
+                        finisher: {
+                            name: 'Lower Back Focus',
+                            duration: '10 minutes',
+                            exercises: [
+                                { ex: 'Stiff Leg Deadlifts', sets: '3', reps: '12-15', notes: 'Light weight' },
+                                { ex: 'Superman Holds', sets: '3', reps: '15 reps', notes: '3-second holds' },
+                                { ex: 'Bird Dog', sets: '3', reps: '10 each side', notes: 'Opposite arm/leg' }
+                            ]
+                        }
                     },
-                    cardioHIIT: {
-                        name: 'Cardio Day (HIIT)',
-                        type: 'HIIT (High-Intensity Interval Training)',
-                        goal: 'Maximize Caloric Expenditure, Boost Metabolism',
-                        duration: '15-20 minutes',
-                        intensity: 'Work: ~85-95% Max HR (158-177 BPM)',
-                        protocols: [
-                            'Treadmill: 5 min warm-up. Then 10 rounds of: 30s sprint / 60s walk. 5 min cool-down.',
-                            'Bike/Rower: 5 min warm-up. Then 8 rounds of: 40s max effort / 80s easy pace. 5 min cool-down.'
-                        ]
+                    friday: {
+                        name: 'Friday: Upper Body + Core (Isolation Focus)',
+                        type: 'Upper Body',
+                        warmup: {
+                            name: 'Treadmill Warm-up',
+                            duration: '20 minutes',
+                            details: 'Moderate pace (3.0-3.5 mph) with slight incline'
+                        },
+                        strength: {
+                            name: 'Strength Training - Isolation Focus',
+                            duration: '45-50 minutes',
+                            exercises: [
+                                { ex: 'Dumbbell Shoulder Press', sets: '4', reps: '10-12', notes: 'Seated or standing' },
+                                { ex: 'Chest Supported Rows', sets: '4', reps: '10-12', notes: 'Incline bench setup' },
+                                { ex: 'Dumbbell Bench Press', sets: '3', reps: '10-12', notes: 'Greater range of motion' },
+                                { ex: 'Cable Lateral Raises', sets: '3', reps: '12-15', notes: 'Constant tension' },
+                                { ex: 'Hammer Curls', sets: '3', reps: '12-15', notes: 'Neutral grip' },
+                                { ex: 'Overhead Tricep Extension', sets: '3', reps: '12-15', notes: 'Seated or standing' },
+                                { ex: 'Cable Crunches', sets: '3', reps: '15-20', notes: 'High cable position' },
+                                { ex: 'Hanging Leg Raises', sets: '3', reps: '8-12', notes: 'Control the swing' }
+                            ]
+                        },
+                        finisher: null
                     },
-                    rest: {
-                        name: 'Rest & Recovery Day',
-                        goal: 'Allow nervous system and tissues to recover and supercompensate. Crucial for long-term progress.'
+                    saturday: {
+                        name: 'Saturday: HIIT + Stretching',
+                        type: 'Cardio & Recovery',
+                        hiit: {
+                            name: 'HIIT Workout',
+                            duration: '25 minutes',
+                            protocol: [
+                                { phase: 'Warm-up', duration: '5 minutes', details: 'Easy walk (3 mph)' },
+                                { phase: 'Work Intervals', duration: '15 minutes', details: '8 rounds: 30s sprint (7-8 mph) / 90s recovery walk (3 mph)' },
+                                { phase: 'Cool-down', duration: '5 minutes', details: 'Easy walk (3 mph)' }
+                            ]
+                        },
+                        stretching: {
+                            name: 'Stretching Routine',
+                            duration: '20 minutes',
+                            exercises: [
+                                { ex: 'Shoulder Rolls & Arm Circles', duration: '2 minutes', notes: 'Dynamic mobility' },
+                                { ex: 'Chest Doorway Stretch', duration: '2 minutes', notes: 'Arm at 90 degrees' },
+                                { ex: 'Hip Flexor Stretch', duration: '2 min each leg', notes: 'Lunge position' },
+                                { ex: 'Hamstring Stretch', duration: '2 min each leg', notes: 'Standing or seated' },
+                                { ex: 'Pigeon Pose', duration: '2 min each side', notes: 'Hip opener' },
+                                { ex: 'Spinal Twist', duration: '2 min each side', notes: 'Seated position' },
+                                { ex: 'Child\'s Pose', duration: '2 minutes', notes: 'Full relaxation' },
+                                { ex: 'Cat-Cow Stretch', duration: '2 minutes', notes: 'Spinal mobility' }
+                            ]
+                        }
+                    },
+                    sunday: {
+                        name: 'Sunday: Rest Day',
+                        type: 'Recovery',
+                        activity: 'Complete rest or light walk/gentle yoga if desired'
                     }
                 },
                 weeklySchedule: [
-                    'rest', // Sunday
-                    'phase.A', // Monday
-                    'cardioLISS', // Tuesday
-                    'phase.B', // Wednesday
-                    'cardioLISS', // Thursday
-                    'phase.C', // Friday
-                    'cardioHIIT' // Saturday
+                    'sunday', // Sunday
+                    'monday', // Monday
+                    'tuesday', // Tuesday
+                    'wednesday', // Wednesday
+                    'thursday', // Thursday
+                    'friday', // Friday
+                    'saturday' // Saturday
                 ],
-                principles: [
-                    { title: 'Progressive Overload', content: 'The principle of gradually increasing the stress placed upon the body over time. This is the single most critical factor for continuous gains. We achieve this by increasing weight, reps/sets (volume), decreasing rest time (density), or using more complex exercises. Diligent tracking is key to ensure consistent, deliberate progress.' },
-                    { title: 'Time Under Tension (TUT)', content: 'Refers to the total duration a muscle is under stress during a set. Maximizing TUT amplifies both mechanical tension and metabolic stress, the primary drivers of muscle growth. We control this with a specific lifting tempo (e.g., 3-1-1-0), focusing on a slow, controlled lowering phase to enhance the stimulus, especially for upper body and core movements.'},
-                    { title: 'Postural Correction (2:1 Pull/Push Ratio)', content: 'To counteract the effects of a sedentary job (rounded shoulders, forward head), this program is intentionally biased towards strengthening the upper back. We program a 2:1 ratio of pulling volume to pushing volume. For every set of a pressing exercise, you will perform two sets of a pulling exercise, systematically strengthening the muscles that pull your shoulders back and promote an upright posture.'},
-                    { title: 'Periodization', content: 'The logical structuring of training into distinct phases, each with a specific focus (e.g., muscle growth, maximal strength, metabolic conditioning). This manipulation of training variables is a proven strategy to manage recovery, prevent plateaus, and optimize long-term progress by providing a novel stimulus in each phase.'},
-                    { title: 'Full Body Training Benefits', content: 'Training all major muscle groups in each session provides higher frequency stimulation (3x per week vs 1x), better movement pattern reinforcement, improved hormonal response, and greater flexibility in scheduling. This approach is particularly effective for strength development and muscle building while maintaining the corrective benefits of the 2:1 pull/push ratio throughout each workout.'}
-                ],
-                cardioInfo: [
-                    { title: 'LISS (Low-Intensity Steady-State)', content: 'Performed at a moderate, consistent heart rate for 30-45 minutes. LISS is excellent for building an aerobic base and aids recovery by promoting blood flow without adding significant stress. It is programmed as "active recovery" the day after strength training.' },
-                    { title: 'HIIT (High-Intensity Interval Training)', content: 'Involves short, all-out bursts of exercise followed by brief recovery. HIIT is time-efficient and creates a significant "afterburn" effect (EPOC), elevating metabolism for hours. Due to its high nervous system demand, it is scheduled before a full rest day.'}
-                ],
-                protocols: [
-                    { 
-                        title: 'Dynamic Warm-Up (10 min)', 
-                        content: 'Perform before every strength workout to raise core temperature, improve mobility, and activate key muscles.',
-                        steps: [
-                            '<strong>General (3 min):</strong> 60s Jumping Jacks, 60s High Knees, 60s Butt Kicks.',
-                            '<strong>Mobility (4 min):</strong> 10 Cat-Cow, 10 Hip Circles/leg, 10 Arm Circles/arm, 8 Inchworms.',
-                            '<strong>Activation (3 min, 2 rounds):</strong> 15 Glute Bridges, 15 Banded Pull-Aparts, 10 Bird-Dog/side.'
+                exerciseGuide: [
+                    {
+                        category: 'Upper Body Compound',
+                        exercises: [
+                            { name: 'Barbell Bench Press', tips: 'Retract shoulder blades, feet firmly planted, control the bar to chest, press up explosively' },
+                            { name: 'Bent-Over Barbell Rows', tips: 'Hip hinge position, pull bar to lower sternum, squeeze shoulder blades together' },
+                            { name: 'Overhead Press', tips: 'Core tight, press straight up, full lockout overhead, control the descent' }
                         ]
                     },
                     {
-                        title: 'Postural Cool-Down (10 min)',
-                        content: 'Perform after workouts or on rest days to release tension in chronically tight muscles.',
-                        steps: [
-                            'Doorway Chest Stretch: 2 sets of 30-45s/side.',
-                            'Kneeling Hip Flexor Stretch: 2 sets of 30-45s/side.',
-                            'Standing Hamstring Stretch: 2 sets of 30-45s/side.',
-                            'Seated Figure-Four Stretch: 2 sets of 30-45s/side.',
-                            'Upper Trap/Neck Stretch: 2 sets of 30s/side.',
-                            'Child\'s Pose: Hold for 60s.'
+                        category: 'Lower Body Compound',
+                        exercises: [
+                            { name: 'Barbell Squats', tips: 'Feet shoulder-width apart, break at hips and knees, thighs parallel, drive through heels' },
+                            { name: 'Romanian Deadlifts', tips: 'Hip hinge movement, keep bar close to body, feel stretch in hamstrings' },
+                            { name: 'Bulgarian Split Squats', tips: 'Most weight on front leg, drop straight down, drive up through front heel' }
+                        ]
+                    },
+                    {
+                        category: 'Core & Stability',
+                        exercises: [
+                            { name: 'Plank', tips: 'Straight line from head to heels, engage core, breathe normally' },
+                            { name: 'Dead Bug', tips: 'Press lower back into floor, move opposite arm/leg slowly' },
+                            { name: 'Bird Dog', tips: 'Neutral spine, extend opposite arm/leg, hold for 2-3 seconds' }
                         ]
                     }
                 ]
             };
             
             let currentView = 'dashboard';
-            let currentPhase = 1;
             let calendarDate = new Date();
 
             const views = {
                 dashboard: document.getElementById('dashboard'),
                 program: document.getElementById('program'),
-                principles: document.getElementById('principles'),
-                cardio: document.getElementById('cardio'),
+                exercises: document.getElementById('exercises'),
+                hiit: document.getElementById('hiit'),
                 progress: document.getElementById('progress')
             };
 
             const navButtons = document.querySelectorAll('.nav-btn');
-            const phaseButtons = document.querySelectorAll('.phase-btn');
 
             function switchView(viewName) {
                 currentView = viewName;
@@ -336,136 +364,129 @@
                 btn.addEventListener('click', () => switchView(btn.dataset.view));
             });
 
-            phaseButtons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    currentPhase = parseInt(btn.dataset.phase);
-                    renderPhaseWorkouts();
-                    phaseButtons.forEach(pb => pb.classList.toggle('active', parseInt(pb.dataset.phase) === currentPhase));
-                });
-            });
+            function createExerciseList(exercises, showNotes = true) {
+                return exercises.map(ex => `
+                    <div class="exercise-item">
+                        <div>
+                            <div class="font-semibold text-slate-800">${ex.ex}</div>
+                            ${showNotes && ex.notes ? `<div class="text-sm text-slate-600 mt-1">${ex.notes}</div>` : ''}
+                        </div>
+                        <div class="text-right">
+                            <div class="font-medium text-teal-700">${ex.sets} × ${ex.reps}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
 
-            function createWorkoutTableHTML(workout, isPhase3 = false) {
-                 if (isPhase3) {
-                    let supersetHtml = workout.plan.map(item => {
-                        if (item.type === 'superset') {
-                            return `
-                                <div class="mb-4">
-                                    <div class="font-semibold text-teal-700">Superset: ${item.exercises[0].sets} sets</div>
-                                    <ul class="list-disc list-inside ml-4 text-slate-700">
-                                        <li>${item.exercises[0].ex} (${item.exercises[0].reps} reps)</li>
-                                        <li>${item.exercises[1].ex} (${item.exercises[1].reps} reps)</li>
-                                    </ul>
-                                    <div class="text-sm text-slate-500 ml-4">Rest: ${item.rest}</div>
-                                </div>`;
-                        }
-                        return `
-                            <div>
-                                <div class="font-semibold text-teal-700">Core Finisher: ${item.sets} sets</div>
-                                 <ul class="list-disc list-inside ml-4 text-slate-700">
-                                    <li>${item.ex} (${item.reps} reps)</li>
-                                </ul>
-                                <div class="text-sm text-slate-500 ml-4">Rest: ${item.rest}</div>
-                            </div>`;
-                    }).join('');
-                    return `<div class="bg-slate-50 p-4 rounded-lg border border-slate-200">${supersetHtml}</div>`;
+            function createWorkoutHTML(workout) {
+                let html = `<h3 class="font-bold text-xl mb-4">${workout.name}</h3>`;
+                
+                if (workout.warmup) {
+                    html += `
+                        <div class="workout-section">
+                            <h4 class="font-bold text-lg mb-3 text-teal-700">🏃 ${workout.warmup.name}</h4>
+                            <div class="bg-white p-4 rounded-lg border border-slate-200">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-medium">${workout.warmup.details}</span>
+                                    <span class="text-teal-600 font-semibold">${workout.warmup.duration}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
                 }
 
-                let rows = workout.plan.map(ex => `
-                    <tr>
-                        <td class="table-cell font-medium">${ex.ex}</td>
-                        <td class="table-cell text-center">${ex.sets}</td>
-                        <td class="table-cell text-center">${ex.reps}</td>
-                        <td class="table-cell text-center">${ex.rest}</td>
-                    </tr>
-                `).join('');
-                return `
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left">
-                            <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
-                                <tr>
-                                    <th class="table-cell">Exercise</th>
-                                    <th class="table-cell text-center">Sets</th>
-                                    <th class="table-cell text-center">Reps</th>
-                                    <th class="table-cell text-center">Rest</th>
-                                </tr>
-                            </thead>
-                            <tbody>${rows}</tbody>
-                        </table>
-                    </div>
-                `;
+                if (workout.strength) {
+                    html += `
+                        <div class="workout-section">
+                            <h4 class="font-bold text-lg mb-3 text-teal-700">💪 ${workout.strength.name}</h4>
+                            <div class="mb-2 text-sm text-slate-600">Duration: ${workout.strength.duration}</div>
+                            ${createExerciseList(workout.strength.exercises)}
+                        </div>
+                    `;
+                }
+
+                if (workout.finisher) {
+                    html += `
+                        <div class="workout-section">
+                            <h4 class="font-bold text-lg mb-3 text-teal-700">🎯 ${workout.finisher.name}</h4>
+                            <div class="mb-2 text-sm text-slate-600">Duration: ${workout.finisher.duration}</div>
+                            ${createExerciseList(workout.finisher.exercises)}
+                        </div>
+                    `;
+                }
+
+                if (workout.hiit) {
+                    html += `
+                        <div class="workout-section">
+                            <h4 class="font-bold text-lg mb-3 text-teal-700">🏃‍♂️ ${workout.hiit.name}</h4>
+                            <div class="mb-2 text-sm text-slate-600">Duration: ${workout.hiit.duration}</div>
+                            ${workout.hiit.protocol.map(phase => `
+                                <div class="bg-white p-3 rounded-lg border border-slate-200 mb-2">
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <span class="font-medium">${phase.phase}</span>
+                                            <div class="text-sm text-slate-600">${phase.details}</div>
+                                        </div>
+                                        <span class="text-teal-600 font-semibold">${phase.duration}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+
+                if (workout.stretching) {
+                    html += `
+                        <div class="workout-section">
+                            <h4 class="font-bold text-lg mb-3 text-teal-700">🧘 ${workout.stretching.name}</h4>
+                            <div class="mb-2 text-sm text-slate-600">Duration: ${workout.stretching.duration}</div>
+                            ${workout.stretching.exercises.map(ex => `
+                                <div class="exercise-item">
+                                    <div>
+                                        <div class="font-semibold text-slate-800">${ex.ex}</div>
+                                        <div class="text-sm text-slate-600 mt-1">${ex.notes}</div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="font-medium text-teal-700">${ex.duration}</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+
+                if (workout.type === 'Recovery') {
+                    html += `
+                        <div class="workout-section">
+                            <h4 class="font-bold text-lg mb-3 text-teal-700">😌 Recovery Day</h4>
+                            <div class="bg-white p-4 rounded-lg border border-slate-200">
+                                <p class="text-slate-700">${workout.activity}</p>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                return html;
             }
 
-            function createWorkoutCardHTML(workout, isPhase3 = false) {
-                return `
-                    <div class="bg-white p-4 rounded-lg shadow-md border border-slate-200 h-full">
-                        <h4 class="font-bold text-lg mb-3 text-slate-800">${workout.name}</h4>
-                        ${createWorkoutTableHTML(workout, isPhase3)}
-                    </div>
-                `;
-            }
-
-            function renderPhaseWorkouts() {
-                const phaseKey = `phase${currentPhase}`;
-                const phaseData = appData.workouts[phaseKey];
-                const container = document.getElementById('phase-details');
-                container.innerHTML = `
-                    <h3 class="text-xl font-bold text-slate-700 mb-4 lg:col-span-3">${phaseData.name}</h3>
-                    ${createWorkoutCardHTML(phaseData.workouts.A, currentPhase === 3)}
-                    ${createWorkoutCardHTML(phaseData.workouts.B, currentPhase === 3)}
-                    ${createWorkoutCardHTML(phaseData.workouts.C, currentPhase === 3)}
-                `;
-            }
-            
             function renderTodayWorkout() {
                 const today = new Date();
-                const workoutKey = appData.weeklySchedule[today.getDay()];
+                const dayKey = appData.weeklySchedule[today.getDay()];
+                const workout = appData.workouts[dayKey];
                 const container = document.getElementById('today-workout-container');
-
-                let workoutData;
-                let workoutHtml = '';
-
-                if (workoutKey.startsWith('phase.')) {
-                    const day = workoutKey.split('.')[1];
-                    workoutData = appData.workouts.phase1.workouts[day];
-                    workoutHtml = `
-                        <h3 class="font-bold text-xl mb-1">Today's Plan: Full Body Workout ${day}</h3>
-                        <p class="text-slate-600 mb-4">${workoutData.name} (from Phase 1)</p>
-                        ${createWorkoutTableHTML(workoutData)}
-                    `;
-                } else {
-                    workoutData = appData.workouts[workoutKey];
-                    if (workoutKey === 'rest') {
-                        workoutHtml = `
-                            <h3 class="font-bold text-xl mb-1">${workoutData.name}</h3>
-                            <p class="text-slate-600">${workoutData.goal}</p>
-                        `;
-                    } else { // Cardio
-                         workoutHtml = `
-                            <h3 class="font-bold text-xl mb-1">${workoutData.name}</h3>
-                            <p class="text-sm text-slate-500 mb-2">${workoutData.type}</p>
-                            <p class="mb-4"><strong class="font-semibold text-slate-700">Goal:</strong> ${workoutData.goal}</p>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                <div class="bg-white p-3 rounded-md border"><strong>Duration:</strong> ${workoutData.duration}</div>
-                                <div class="bg-white p-3 rounded-md border"><strong>Intensity:</strong> ${workoutData.intensity}</div>
-                            </div>
-                            <h4 class="font-semibold mt-4 mb-2">Protocols:</h4>
-                            <ul class="list-disc list-inside space-y-1 text-slate-600">
-                                ${workoutData.protocols.map(p => `<li>${p}</li>`).join('')}
-                            </ul>
-                        `;
-                    }
-                }
 
                 const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
                 const completedWorkouts = JSON.parse(localStorage.getItem('completedWorkouts') || '[]');
                 const isCompletedToday = completedWorkouts.includes(todayStr);
 
+                let workoutHtml = createWorkoutHTML(workout);
+
                 let buttonHtml = '';
-                if (workoutKey !== 'rest') {
+                if (workout.type !== 'Recovery') {
                     buttonHtml = `
                         <div class="mt-6 text-center">
-                            <button id="mark-complete-btn" class="py-2 px-6 rounded-lg text-white font-semibold transition ${isCompletedToday ? 'bg-gray-400 cursor-not-allowed' : 'bg-teal-600 hover:bg-teal-700'}" ${isCompletedToday ? 'disabled' : ''}>
-                                ${isCompletedToday ? '✓ Completed' : 'Mark as Complete'}
+                            <button id="mark-complete-btn" class="py-3 px-8 rounded-lg text-white font-semibold transition ${isCompletedToday ? 'bg-gray-400 cursor-not-allowed' : 'bg-teal-600 hover:bg-teal-700'}" ${isCompletedToday ? 'disabled' : ''}>
+                                ${isCompletedToday ? '✅ Completed Today' : 'Mark as Complete'}
                             </button>
                             <p id="completion-message" class="text-green-600 mt-2 h-5"></p>
                         </div>
@@ -474,7 +495,7 @@
 
                 container.innerHTML = workoutHtml + buttonHtml;
 
-                if (workoutKey !== 'rest' && !isCompletedToday) {
+                if (workout.type !== 'Recovery' && !isCompletedToday) {
                     document.getElementById('mark-complete-btn').addEventListener('click', () => {
                         const currentCompleted = JSON.parse(localStorage.getItem('completedWorkouts') || '[]');
                         if (!currentCompleted.includes(todayStr)) {
@@ -484,12 +505,12 @@
                         
                         const btn = document.getElementById('mark-complete-btn');
                         btn.disabled = true;
-                        btn.innerHTML = '✓ Completed';
+                        btn.innerHTML = '✅ Completed Today';
                         btn.classList.add('bg-gray-400', 'cursor-not-allowed');
                         btn.classList.remove('bg-teal-600', 'hover:bg-teal-700');
 
                         const msg = document.getElementById('completion-message');
-                        msg.textContent = 'Great job! Workout logged.';
+                        msg.textContent = 'Excellent work! Workout logged successfully.';
                         setTimeout(() => { msg.textContent = '' }, 3000);
                         
                         renderCalendar(calendarDate.getFullYear(), calendarDate.getMonth());
@@ -497,90 +518,106 @@
                 }
             }
 
-            function renderPrinciples() {
-                const container = document.getElementById('principles-container');
-                container.innerHTML = appData.principles.map(p => `
+            function renderWeeklySchedule() {
+                const container = document.getElementById('weekly-schedule');
+                const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                
+                container.innerHTML = days.map((day, index) => {
+                    const dayKey = appData.weeklySchedule[index];
+                    const workout = appData.workouts[dayKey];
+                    const today = new Date().getDay();
+                    const isToday = index === today;
+                    
+                    return `
+                        <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200 ${isToday ? 'ring-2 ring-teal-500' : ''}">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="font-bold text-lg text-slate-800">${day}</h3>
+                                ${isToday ? '<span class="bg-teal-100 text-teal-800 px-2 py-1 rounded-full text-xs font-semibold">TODAY</span>' : ''}
+                            </div>
+                            <div class="mb-3">
+                                <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                                    workout.type === 'Upper Body' ? 'bg-blue-100 text-blue-800' :
+                                    workout.type === 'Lower Body' ? 'bg-green-100 text-green-800' :
+                                    workout.type === 'Cardio & Recovery' ? 'bg-purple-100 text-purple-800' :
+                                    'bg-gray-100 text-gray-800'
+                                }">${workout.type}</span>
+                            </div>
+                            <h4 class="font-semibold mb-2">${workout.name}</h4>
+                            ${workout.warmup ? `<p class="text-sm text-slate-600 mb-1">• ${workout.warmup.duration} warm-up</p>` : ''}
+                            ${workout.strength ? `<p class="text-sm text-slate-600 mb-1">• ${workout.strength.duration} strength training</p>` : ''}
+                            ${workout.finisher ? `<p class="text-sm text-slate-600 mb-1">• ${workout.finisher.duration} finisher</p>` : ''}
+                            ${workout.hiit ? `<p class="text-sm text-slate-600 mb-1">• ${workout.hiit.duration} HIIT</p>` : ''}
+                            ${workout.stretching ? `<p class="text-sm text-slate-600 mb-1">• ${workout.stretching.duration} stretching</p>` : ''}
+                            ${workout.type === 'Recovery' ? `<p class="text-sm text-slate-600">${workout.activity}</p>` : ''}
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            function renderExerciseGuide() {
+                const container = document.getElementById('exercise-guide-container');
+                container.innerHTML = appData.exerciseGuide.map(category => `
                     <details class="bg-slate-50 rounded-lg border border-slate-200 group">
                         <summary class="p-4 font-semibold cursor-pointer list-none flex justify-between items-center">
-                            <span>${p.title}</span>
-                            <span class="text-teal-500 transform transition-transform duration-300 group-open:rotate-180">&#9660;</span>
+                            <span>${category.category}</span>
+                            <span class="text-teal-500 transform transition-transform duration-300 group-open:rotate-180">▼</span>
                         </summary>
-                        <div class="p-4 border-t border-slate-200 text-slate-600">
-                            <p>${p.content}</p>
+                        <div class="p-4 border-t border-slate-200">
+                            ${category.exercises.map(ex => `
+                                <div class="mb-4 last:mb-0">
+                                    <h4 class="font-semibold text-slate-800 mb-2">${ex.name}</h4>
+                                    <p class="text-slate-600 text-sm">${ex.tips}</p>
+                                </div>
+                            `).join('')}
                         </div>
                     </details>
                 `).join('');
             }
-            
-            function renderCardioAndProtocols() {
-                const cardioContainer = document.getElementById('cardio-container');
-                const protocolsContainer = document.getElementById('protocols-container');
-                
-                cardioContainer.innerHTML = appData.cardioInfo.map(c => `
-                    <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                        <h4 class="font-bold text-lg mb-2">${c.title}</h4>
-                        <p class="text-slate-600">${c.content}</p>
-                    </div>
-                `).join('');
 
-                protocolsContainer.innerHTML = appData.protocols.map(p => `
-                    <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                        <h4 class="font-bold text-lg mb-2">${p.title}</h4>
-                        <p class="text-slate-600 mb-3">${p.content}</p>
-                        <ul class="space-y-2 text-sm text-slate-700">
-                            ${p.steps.map(s => `<li class="flex items-start"><span class="text-teal-500 mr-2 mt-1">&#10003;</span><span>${s}</span></li>`).join('')}
-                        </ul>
-                    </div>
-                `).join('');
-            }
+            function renderHIITAndStretching() {
+                const hiitContainer = document.getElementById('hiit-container');
+                const stretchingContainer = document.getElementById('stretching-container');
+                const saturdayWorkout = appData.workouts.saturday;
 
-            function renderHeartRateChart() {
-                const ctx = document.getElementById('cardioChart').getContext('2d');
-                const maxHR = 186;
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: ['LISS (Zone 2)', 'HIIT (Work Interval)'],
-                        datasets: [{
-                            label: 'Target BPM',
-                            data: [121, 167], 
-                            backgroundColor: ['#2dd4bf', '#f43f5e'],
-                            borderColor: ['#14b8a6', '#e11d48'],
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Max Heart Rate',
-                            data: [maxHR, maxHR],
-                            backgroundColor: 'rgba(203, 213, 225, 0.5)',
-                            borderColor: '#94a3b8',
-                            borderWidth: 1,
-                            type: 'line',
-                            pointRadius: 0,
-                            borderDash: [5, 5]
-                        }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            title: { display: true, text: 'Target Beats Per Minute (BPM)' },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        let label = context.dataset.label || '';
-                                        if (label) { label += ': '; }
-                                        if (context.parsed.y !== null) { label += context.parsed.y + ' BPM'; }
-                                        return label;
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            y: { beginAtZero: true, max: maxHR + 14, title: { display: true, text: 'Heart Rate (BPM)' } }
-                        }
-                    }
-                });
+                hiitContainer.innerHTML = `
+                    <div>
+                        <h3 class="text-xl font-bold mb-4">🏃‍♂️ ${saturdayWorkout.hiit.name}</h3>
+                        <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                            <div class="mb-3 text-sm text-slate-600">Total Duration: ${saturdayWorkout.hiit.duration}</div>
+                            ${saturdayWorkout.hiit.protocol.map(phase => `
+                                <div class="bg-white p-3 rounded-lg border border-slate-200 mb-3 last:mb-0">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <span class="font-semibold text-slate-800">${phase.phase}</span>
+                                            <div class="text-sm text-slate-600 mt-1">${phase.details}</div>
+                                        </div>
+                                        <span class="text-teal-600 font-semibold">${phase.duration}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+
+                stretchingContainer.innerHTML = `
+                    <div>
+                        <h3 class="text-xl font-bold mb-4">🧘 ${saturdayWorkout.stretching.name}</h3>
+                        <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                            <div class="mb-3 text-sm text-slate-600">Total Duration: ${saturdayWorkout.stretching.duration}</div>
+                            ${saturdayWorkout.stretching.exercises.map(ex => `
+                                <div class="bg-white p-3 rounded-lg border border-slate-200 mb-3 last:mb-0">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <span class="font-semibold text-slate-800">${ex.ex}</span>
+                                            <div class="text-sm text-slate-600 mt-1">${ex.notes}</div>
+                                        </div>
+                                        <span class="text-teal-600 font-semibold">${ex.duration}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
             }
 
             function renderCalendar(year, month) {
@@ -592,18 +629,18 @@
                 const daysInMonth = new Date(year, month + 1, 0).getDate();
 
                 let html = `
-                    <div class="flex justify-between items-center mb-4">
-                        <button id="prev-month" class="p-2 rounded-full hover:bg-slate-200 w-10 h-10 flex items-center justify-center transition">&#9664;</button>
-                        <h3 class="text-xl font-bold text-slate-700">${monthNames[month]} ${year}</h3>
-                        <button id="next-month" class="p-2 rounded-full hover:bg-slate-200 w-10 h-10 flex items-center justify-center transition">&#9654;</button>
+                    <div class="flex justify-between items-center mb-6">
+                        <button id="prev-month" class="p-3 rounded-full hover:bg-slate-200 w-12 h-12 flex items-center justify-center transition font-bold text-slate-600">‹</button>
+                        <h3 class="text-2xl font-bold text-slate-700">${monthNames[month]} ${year}</h3>
+                        <button id="next-month" class="p-3 rounded-full hover:bg-slate-200 w-12 h-12 flex items-center justify-center transition font-bold text-slate-600">›</button>
                     </div>
-                    <div class="grid grid-cols-7 gap-1 md:gap-2 text-center font-semibold text-slate-600 text-sm">
-                        ${daysOfWeek.map(day => `<div>${day}</div>`).join('')}
+                    <div class="grid grid-cols-7 gap-2 text-center font-semibold text-slate-600 text-sm mb-2">
+                        ${daysOfWeek.map(day => `<div class="p-2">${day}</div>`).join('')}
                     </div>
-                    <div class="grid grid-cols-7 gap-1 md:gap-2 mt-2 text-center text-sm">
+                    <div class="grid grid-cols-7 gap-2 text-center text-sm">
                 `;
 
-                for (let i = 0; i < firstDay; i++) { html += `<div></div>`; }
+                for (let i = 0; i < firstDay; i++) { html += `<div class="h-16"></div>`; }
 
                 const today = new Date();
                 const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
@@ -612,23 +649,43 @@
                     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                     const isCompleted = completedWorkouts.includes(dateStr);
                     const isToday = dateStr === todayStr;
+                    const dayOfWeek = new Date(year, month, day).getDay();
+                    const workoutType = appData.workouts[appData.weeklySchedule[dayOfWeek]].type;
 
-                    let cellClasses = 'p-2 rounded-lg flex flex-col justify-center items-center h-12 md:h-16 transition';
+                    let cellClasses = 'p-2 rounded-lg flex flex-col justify-center items-center h-16 transition cursor-pointer border-2';
+                    let workoutIndicator = '';
+                    
                     if (isToday) {
-                        cellClasses += ' bg-teal-100 ring-2 ring-teal-500';
+                        cellClasses += ' bg-teal-100 border-teal-500 ring-2 ring-teal-300';
                     } else if (isCompleted) {
-                        cellClasses += ' bg-green-100';
+                        cellClasses += ' bg-green-100 border-green-300';
                     } else {
-                        cellClasses += ' bg-slate-100'
+                        cellClasses += ' bg-slate-50 border-slate-200 hover:bg-slate-100';
                     }
 
+                    if (workoutType === 'Upper Body') workoutIndicator = '💪';
+                    else if (workoutType === 'Lower Body') workoutIndicator = '🦵';
+                    else if (workoutType === 'Cardio & Recovery') workoutIndicator = '🏃';
+                    else workoutIndicator = '😌';
+
                     html += `<div class="${cellClasses}">
-                                <span>${day}</span>
-                                ${isCompleted ? '<span class="text-green-600 text-xl mt-1">&#10004;</span>' : ''}
+                                <span class="font-medium">${day}</span>
+                                <span class="text-xs mt-1">${workoutIndicator}</span>
+                                ${isCompleted ? '<span class="text-green-600 text-lg">✓</span>' : ''}
                              </div>`;
                 }
 
                 html += `</div>`;
+                
+                html += `
+                    <div class="mt-6 flex flex-wrap justify-center gap-4 text-sm">
+                        <div class="flex items-center gap-2"><span>💪</span><span>Upper Body</span></div>
+                        <div class="flex items-center gap-2"><span>🦵</span><span>Lower Body</span></div>
+                        <div class="flex items-center gap-2"><span>🏃</span><span>HIIT + Stretching</span></div>
+                        <div class="flex items-center gap-2"><span>😌</span><span>Rest Day</span></div>
+                    </div>
+                `;
+
                 calendarContainer.innerHTML = html;
 
                 document.getElementById('prev-month').addEventListener('click', () => {
@@ -641,15 +698,12 @@
                 });
             }
 
-
             // Initial Render
             switchView('dashboard');
-            phaseButtons[0].classList.add('active');
             renderTodayWorkout();
-            renderPhaseWorkouts();
-            renderPrinciples();
-            renderCardioAndProtocols();
-            renderHeartRateChart();
+            renderWeeklySchedule();
+            renderExerciseGuide();
+            renderHIITAndStretching();
             renderCalendar(calendarDate.getFullYear(), calendarDate.getMonth());
         });
     </script>
