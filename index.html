@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upper/Lower Split Program</title>
+    <title>3-Focus Training Program</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -45,15 +45,14 @@
     <div id="app" class="container mx-auto p-4 md:p-8 max-w-7xl">
 
         <header class="text-center mb-8">
-            <h1 class="text-4xl md:text-5xl font-bold text-slate-900">Upper/Lower Split Program</h1>
-            <p class="text-slate-600 mt-2 text-lg">Your 6-Day Training Protocol with Dedicated Upper/Lower Focus</p>
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-900">3-Focus Training Program</h1>
+            <p class="text-slate-600 mt-2 text-lg">Upper Body • Core & Lower Back • Lower Body - Each Focus Twice Weekly</p>
         </header>
 
         <nav class="flex flex-wrap justify-center gap-2 md:gap-4 mb-8 sticky top-4 bg-slate-50/80 backdrop-blur-sm py-2 z-10">
             <button data-view="dashboard" class="nav-btn active text-sm md:text-base font-semibold py-2 px-4 rounded-full bg-white shadow-sm hover:bg-teal-500 hover:text-white">Today's Workout</button>
             <button data-view="program" class="nav-btn text-sm md:text-base font-semibold py-2 px-4 rounded-full bg-white shadow-sm hover:bg-teal-500 hover:text-white">Weekly Schedule</button>
             <button data-view="exercises" class="nav-btn text-sm md:text-base font-semibold py-2 px-4 rounded-full bg-white shadow-sm hover:bg-teal-500 hover:text-white">Exercise Guide</button>
-            <button data-view="hiit" class="nav-btn text-sm md:text-base font-semibold py-2 px-4 rounded-full bg-white shadow-sm hover:bg-teal-500 hover:text-white">HIIT & Stretching</button>
             <button data-view="progress" class="nav-btn text-sm md:text-base font-semibold py-2 px-4 rounded-full bg-white shadow-sm hover:bg-teal-500 hover:text-white">Progress</button>
         </nav>
 
@@ -62,7 +61,7 @@
             <div id="dashboard" class="view active">
                 <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200">
                     <h2 class="text-2xl font-bold mb-1 text-teal-600">Today's Training</h2>
-                    <p class="text-slate-600 mb-6">Your customized workout for today. Each session includes a 20-minute treadmill warm-up followed by targeted strength training and finisher work.</p>
+                    <p class="text-slate-600 mb-6">Your customized workout for today. Each session includes a 20-minute treadmill warm-up followed by targeted strength training.</p>
                     <div id="today-workout-container" class="bg-slate-50 p-6 rounded-lg border border-slate-200"></div>
                 </div>
             </div>
@@ -71,7 +70,7 @@
             <div id="program" class="view">
                 <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200">
                     <h2 class="text-2xl font-bold mb-1 text-teal-600">Weekly Training Schedule</h2>
-                    <p class="text-slate-600 mb-6">A comprehensive 6-day upper/lower split designed to maximize muscle development and strength gains. Each workout targets specific muscle groups with appropriate volume and intensity.</p>
+                    <p class="text-slate-600 mb-6">A comprehensive 6-day program with three distinct focuses. Each focus area is trained twice weekly for optimal development and recovery.</p>
                     <div id="weekly-schedule" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
                 </div>
             </div>
@@ -82,18 +81,6 @@
                     <h2 class="text-2xl font-bold mb-1 text-teal-600">Exercise Guide & Tips</h2>
                     <p class="text-slate-600 mb-6">Key form cues and exercise variations to ensure safe, effective training and continuous progression.</p>
                     <div id="exercise-guide-container" class="space-y-4"></div>
-                </div>
-            </div>
-
-            <!-- HIIT & Stretching View -->
-            <div id="hiit" class="view">
-                <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200">
-                    <h2 class="text-2xl font-bold mb-1 text-teal-600">HIIT & Recovery Protocols</h2>
-                    <p class="text-slate-600 mb-6">High-intensity interval training and comprehensive stretching routines for optimal recovery and conditioning.</p>
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <div id="hiit-container"></div>
-                        <div id="stretching-container"></div>
-                    </div>
                 </div>
             </div>
 
@@ -113,7 +100,7 @@
             const appData = {
                 workouts: {
                     monday: {
-                        name: 'Monday: Upper Body + Core',
+                        name: 'Monday: Upper Body (Session 1)',
                         type: 'Upper Body',
                         warmup: {
                             name: 'Treadmill Warm-up',
@@ -121,7 +108,7 @@
                             details: 'Moderate pace (3.0-3.5 mph) with slight incline'
                         },
                         strength: {
-                            name: 'Strength Training',
+                            name: 'Upper Body Strength Training',
                             duration: '45-50 minutes',
                             exercises: [
                                 { ex: 'Barbell Bench Press', sets: '4', reps: '8-10', notes: 'Focus on controlled tempo' },
@@ -129,89 +116,38 @@
                                 { ex: 'Overhead Press', sets: '3', reps: '10-12', notes: 'Standing or seated' },
                                 { ex: 'Pull-ups/Lat Pulldowns', sets: '3', reps: '8-12', notes: 'Full range of motion' },
                                 { ex: 'Dumbbell Incline Press', sets: '3', reps: '10-12', notes: '30-45 degree incline' },
-                                { ex: 'Dumbbell Rows', sets: '3', reps: '10-12 each arm', notes: 'Single arm, supported' },
-                                { ex: 'Tricep Dips/Close-Grip Press', sets: '3', reps: '10-15', notes: 'Full range of motion' },
+                                { ex: 'Cable Rows', sets: '3', reps: '10-12', notes: 'Squeeze shoulder blades' },
+                                { ex: 'Tricep Dips', sets: '3', reps: '10-15', notes: 'Full range of motion' },
                                 { ex: 'Barbell Curls', sets: '3', reps: '10-12', notes: 'Controlled movement' }
-                            ]
-                        },
-                        finisher: {
-                            name: 'Core Circuit',
-                            duration: '10 minutes',
-                            exercises: [
-                                { ex: 'Plank', sets: '3', reps: '45-60 seconds', notes: 'Maintain straight line' },
-                                { ex: 'Russian Twists', sets: '3', reps: '20 each side', notes: 'Feet off ground' },
-                                { ex: 'Dead Bug', sets: '3', reps: '10 each side', notes: 'Keep lower back flat' },
-                                { ex: 'Mountain Climbers', sets: '3', reps: '20 total', notes: 'Fast tempo' }
                             ]
                         }
                     },
                     tuesday: {
-                        name: 'Tuesday: Lower Body + Lower Back',
-                        type: 'Lower Body',
+                        name: 'Tuesday: Core & Lower Back (Session 1)',
+                        type: 'Core & Lower Back',
                         warmup: {
                             name: 'Treadmill Warm-up',
                             duration: '20 minutes',
                             details: 'Moderate pace (3.0-3.5 mph) with slight incline'
                         },
                         strength: {
-                            name: 'Strength Training',
+                            name: 'Core & Lower Back Training',
                             duration: '45-50 minutes',
                             exercises: [
-                                { ex: 'Barbell Squats', sets: '4', reps: '8-10', notes: 'Deep squat, knees track over toes' },
-                                { ex: 'Romanian Deadlifts', sets: '4', reps: '8-10', notes: 'Hip hinge movement' },
-                                { ex: 'Bulgarian Split Squats', sets: '3', reps: '10-12 each leg', notes: 'Rear foot elevated' },
-                                { ex: 'Hip Thrusts', sets: '3', reps: '12-15', notes: 'Squeeze glutes at top' },
-                                { ex: 'Walking Lunges', sets: '3', reps: '12 each leg', notes: 'Step forward, sink down' },
-                                { ex: 'Calf Raises', sets: '3', reps: '15-20', notes: 'Full range of motion' },
-                                { ex: 'Leg Curls', sets: '3', reps: '12-15', notes: 'Lying or seated' },
-                                { ex: 'Glute Bridges', sets: '3', reps: '15-20', notes: 'Two feet on ground' }
-                            ]
-                        },
-                        finisher: {
-                            name: 'Lower Back Focus',
-                            duration: '10 minutes',
-                            exercises: [
+                                { ex: 'Deadlifts', sets: '4', reps: '6-8', notes: 'Focus on form, hip hinge pattern' },
+                                { ex: 'Plank', sets: '4', reps: '45-60 seconds', notes: 'Maintain straight line' },
+                                { ex: 'Russian Twists', sets: '4', reps: '20 each side', notes: 'Feet off ground, control rotation' },
+                                { ex: 'Hyperextensions', sets: '3', reps: '12-15', notes: 'Controlled movement, squeeze glutes' },
+                                { ex: 'Dead Bug', sets: '3', reps: '10 each side', notes: 'Keep lower back flat' },
                                 { ex: 'Good Mornings', sets: '3', reps: '12-15', notes: 'Light weight, hip hinge' },
-                                { ex: 'Hyperextensions', sets: '3', reps: '12-15', notes: 'Controlled movement' },
-                                { ex: 'Bird Dog', sets: '3', reps: '10 each side', notes: 'Opposite arm/leg' }
+                                { ex: 'Hanging Leg Raises', sets: '3', reps: '8-12', notes: 'Control the swing' },
+                                { ex: 'Bird Dog', sets: '3', reps: '10 each side', notes: 'Opposite arm/leg' },
+                                { ex: 'Side Plank', sets: '3', reps: '30-45 sec each', notes: 'Hold position, breathe normally' }
                             ]
                         }
                     },
                     wednesday: {
-                        name: 'Wednesday: Upper Body + Core (Variation)',
-                        type: 'Upper Body',
-                        warmup: {
-                            name: 'Treadmill Warm-up',
-                            duration: '20 minutes',
-                            details: 'Moderate pace (3.0-3.5 mph) with slight incline'
-                        },
-                        strength: {
-                            name: 'Strength Training',
-                            duration: '45-50 minutes',
-                            exercises: [
-                                { ex: 'Incline Barbell Press', sets: '4', reps: '8-10', notes: 'Instead of flat bench' },
-                                { ex: 'Bent-Over Barbell Rows', sets: '4', reps: '8-10', notes: 'Keep back straight' },
-                                { ex: 'Overhead Press', sets: '3', reps: '10-12', notes: 'Standing or seated' },
-                                { ex: 'Pull-ups/Lat Pulldowns', sets: '3', reps: '8-12', notes: 'Wide grip variation' },
-                                { ex: 'Cable Flyes', sets: '3', reps: '10-12', notes: 'Instead of dumbbell incline' },
-                                { ex: 'Dumbbell Rows', sets: '3', reps: '10-12 each arm', notes: 'Single arm, supported' },
-                                { ex: 'Face Pulls', sets: '3', reps: '12-15', notes: 'Rear delt focus' },
-                                { ex: 'Hammer Curls', sets: '3', reps: '10-12', notes: 'Neutral grip' }
-                            ]
-                        },
-                        finisher: {
-                            name: 'Core Circuit',
-                            duration: '10 minutes',
-                            exercises: [
-                                { ex: 'Plank', sets: '3', reps: '45-60 seconds', notes: 'Maintain straight line' },
-                                { ex: 'Bicycle Crunches', sets: '3', reps: '20 each side', notes: 'Controlled movement' },
-                                { ex: 'Dead Bug', sets: '3', reps: '10 each side', notes: 'Keep lower back flat' },
-                                { ex: 'Mountain Climbers', sets: '3', reps: '20 total', notes: 'Fast tempo' }
-                            ]
-                        }
-                    },
-                    thursday: {
-                        name: 'Thursday: Lower Body + Lower Back (Variation)',
+                        name: 'Wednesday: Lower Body (Session 1)',
                         type: 'Lower Body',
                         warmup: {
                             name: 'Treadmill Warm-up',
@@ -219,31 +155,22 @@
                             details: 'Moderate pace (3.0-3.5 mph) with slight incline'
                         },
                         strength: {
-                            name: 'Strength Training',
+                            name: 'Lower Body Strength Training',
                             duration: '45-50 minutes',
                             exercises: [
-                                { ex: 'Front Squats', sets: '4', reps: '8-10', notes: 'Instead of back squats' },
-                                { ex: 'Sumo Deadlifts', sets: '4', reps: '8-10', notes: 'Wide stance, toes out' },
-                                { ex: 'Step-ups', sets: '3', reps: '10-12 each leg', notes: 'Instead of Bulgarian splits' },
-                                { ex: 'Hip Thrusts', sets: '3', reps: '12-15', notes: 'Single leg variation' },
-                                { ex: 'Reverse Lunges', sets: '3', reps: '12 each leg', notes: 'Step back, control descent' },
-                                { ex: 'Seated Calf Raises', sets: '3', reps: '15-20', notes: 'Different angle' },
-                                { ex: 'Nordic Curls (or Leg Curls)', sets: '3', reps: '8-12', notes: 'Eccentric focus' },
-                                { ex: 'Single Leg Glute Bridges', sets: '3', reps: '12-15 each', notes: 'Unilateral work' }
-                            ]
-                        },
-                        finisher: {
-                            name: 'Lower Back Focus',
-                            duration: '10 minutes',
-                            exercises: [
-                                { ex: 'Stiff Leg Deadlifts', sets: '3', reps: '12-15', notes: 'Light weight' },
-                                { ex: 'Superman Holds', sets: '3', reps: '15 reps', notes: '3-second holds' },
-                                { ex: 'Bird Dog', sets: '3', reps: '10 each side', notes: 'Opposite arm/leg' }
+                                { ex: 'Barbell Squats', sets: '4', reps: '8-10', notes: 'Deep squat, knees track over toes' },
+                                { ex: 'Romanian Deadlifts', sets: '4', reps: '8-10', notes: 'Hip hinge movement, feel hamstring stretch' },
+                                { ex: 'Bulgarian Split Squats', sets: '3', reps: '10-12 each leg', notes: 'Rear foot elevated' },
+                                { ex: 'Hip Thrusts', sets: '3', reps: '12-15', notes: 'Squeeze glutes at top' },
+                                { ex: 'Walking Lunges', sets: '3', reps: '12 each leg', notes: 'Step forward, sink down' },
+                                { ex: 'Leg Curls', sets: '3', reps: '12-15', notes: 'Lying or seated' },
+                                { ex: 'Calf Raises', sets: '3', reps: '15-20', notes: 'Full range of motion' },
+                                { ex: 'Glute Bridges', sets: '3', reps: '15-20', notes: 'Two feet on ground' }
                             ]
                         }
                     },
-                    friday: {
-                        name: 'Friday: Upper Body + Core (Isolation Focus)',
+                    thursday: {
+                        name: 'Thursday: Upper Body (Session 2)',
                         type: 'Upper Body',
                         warmup: {
                             name: 'Treadmill Warm-up',
@@ -251,52 +178,71 @@
                             details: 'Moderate pace (3.0-3.5 mph) with slight incline'
                         },
                         strength: {
-                            name: 'Strength Training - Isolation Focus',
+                            name: 'Upper Body Strength Training',
                             duration: '45-50 minutes',
                             exercises: [
-                                { ex: 'Dumbbell Shoulder Press', sets: '4', reps: '10-12', notes: 'Seated or standing' },
-                                { ex: 'Chest Supported Rows', sets: '4', reps: '10-12', notes: 'Incline bench setup' },
-                                { ex: 'Dumbbell Bench Press', sets: '3', reps: '10-12', notes: 'Greater range of motion' },
-                                { ex: 'Cable Lateral Raises', sets: '3', reps: '12-15', notes: 'Constant tension' },
-                                { ex: 'Hammer Curls', sets: '3', reps: '12-15', notes: 'Neutral grip' },
-                                { ex: 'Overhead Tricep Extension', sets: '3', reps: '12-15', notes: 'Seated or standing' },
-                                { ex: 'Cable Crunches', sets: '3', reps: '15-20', notes: 'High cable position' },
-                                { ex: 'Hanging Leg Raises', sets: '3', reps: '8-12', notes: 'Control the swing' }
+                                { ex: 'Incline Barbell Press', sets: '4', reps: '8-10', notes: 'Different angle from Monday' },
+                                { ex: 'T-Bar Rows', sets: '4', reps: '8-10', notes: 'Or chest-supported rows' },
+                                { ex: 'Dumbbell Shoulder Press', sets: '3', reps: '10-12', notes: 'Seated or standing' },
+                                { ex: 'Wide-Grip Pull-ups/Pulldowns', sets: '3', reps: '8-12', notes: 'Different grip from Monday' },
+                                { ex: 'Cable Flyes', sets: '3', reps: '10-12', notes: 'Constant tension' },
+                                { ex: 'Face Pulls', sets: '3', reps: '12-15', notes: 'Rear delt focus' },
+                                { ex: 'Overhead Tricep Extension', sets: '3', reps: '10-15', notes: 'Seated or standing' },
+                                { ex: 'Hammer Curls', sets: '3', reps: '10-12', notes: 'Neutral grip' }
                             ]
+                        }
+                    },
+                    friday: {
+                        name: 'Friday: Core & Lower Back (Session 2)',
+                        type: 'Core & Lower Back',
+                        warmup: {
+                            name: 'Treadmill Warm-up',
+                            duration: '20 minutes',
+                            details: 'Moderate pace (3.0-3.5 mph) with slight incline'
                         },
-                        finisher: null
+                        strength: {
+                            name: 'Core & Lower Back Training',
+                            duration: '45-50 minutes',
+                            exercises: [
+                                { ex: 'Sumo Deadlifts', sets: '4', reps: '6-8', notes: 'Wide stance, different from Tuesday' },
+                                { ex: 'Ab Wheel Rollouts', sets: '4', reps: '8-12', notes: 'Or plank variations if no wheel' },
+                                { ex: 'Bicycle Crunches', sets: '4', reps: '20 each side', notes: 'Controlled movement' },
+                                { ex: 'Stiff Leg Deadlifts', sets: '3', reps: '12-15', notes: 'Light weight, stretch focus' },
+                                { ex: 'Mountain Climbers', sets: '3', reps: '20 total', notes: 'Fast tempo, core engagement' },
+                                { ex: 'Superman Holds', sets: '3', reps: '15 reps', notes: '3-second holds' },
+                                { ex: 'Cable Crunches', sets: '3', reps: '15-20', notes: 'High cable position' },
+                                { ex: 'Reverse Plank', sets: '3', reps: '30-45 seconds', notes: 'Face up, straight body' },
+                                { ex: 'Pallof Press', sets: '3', reps: '10 each side', notes: 'Anti-rotation core work' }
+                            ]
+                        }
                     },
                     saturday: {
-                        name: 'Saturday: HIIT + Stretching',
-                        type: 'Cardio & Recovery',
-                        hiit: {
-                            name: 'HIIT Workout',
-                            duration: '25 minutes',
-                            protocol: [
-                                { phase: 'Warm-up', duration: '5 minutes', details: 'Easy walk (3 mph)' },
-                                { phase: 'Work Intervals', duration: '15 minutes', details: '8 rounds: 30s sprint (7-8 mph) / 90s recovery walk (3 mph)' },
-                                { phase: 'Cool-down', duration: '5 minutes', details: 'Easy walk (3 mph)' }
-                            ]
-                        },
-                        stretching: {
-                            name: 'Stretching Routine',
+                        name: 'Saturday: Lower Body (Session 2)',
+                        type: 'Lower Body',
+                        warmup: {
+                            name: 'Treadmill Warm-up',
                             duration: '20 minutes',
+                            details: 'Moderate pace (3.0-3.5 mph) with slight incline'
+                        },
+                        strength: {
+                            name: 'Lower Body Strength Training',
+                            duration: '45-50 minutes',
                             exercises: [
-                                { ex: 'Shoulder Rolls & Arm Circles', duration: '2 minutes', notes: 'Dynamic mobility' },
-                                { ex: 'Chest Doorway Stretch', duration: '2 minutes', notes: 'Arm at 90 degrees' },
-                                { ex: 'Hip Flexor Stretch', duration: '2 min each leg', notes: 'Lunge position' },
-                                { ex: 'Hamstring Stretch', duration: '2 min each leg', notes: 'Standing or seated' },
-                                { ex: 'Pigeon Pose', duration: '2 min each side', notes: 'Hip opener' },
-                                { ex: 'Spinal Twist', duration: '2 min each side', notes: 'Seated position' },
-                                { ex: 'Child\'s Pose', duration: '2 minutes', notes: 'Full relaxation' },
-                                { ex: 'Cat-Cow Stretch', duration: '2 minutes', notes: 'Spinal mobility' }
+                                { ex: 'Front Squats', sets: '4', reps: '8-10', notes: 'Different squat variation' },
+                                { ex: 'Single Leg RDLs', sets: '4', reps: '8-10 each leg', notes: 'Unilateral work' },
+                                { ex: 'Step-ups', sets: '3', reps: '10-12 each leg', notes: 'Use bench or box' },
+                                { ex: 'Single Leg Hip Thrusts', sets: '3', reps: '10-12 each', notes: 'Unilateral glute work' },
+                                { ex: 'Reverse Lunges', sets: '3', reps: '12 each leg', notes: 'Step back, control descent' },
+                                { ex: 'Nordic Curls', sets: '3', reps: '5-8', notes: 'Eccentric hamstring work' },
+                                { ex: 'Seated Calf Raises', sets: '3', reps: '15-20', notes: 'Different angle from Wednesday' },
+                                { ex: 'Wall Sit', sets: '3', reps: '45-60 seconds', notes: 'Isometric quad work' }
                             ]
                         }
                     },
                     sunday: {
                         name: 'Sunday: Rest Day',
                         type: 'Recovery',
-                        activity: 'Complete rest or light walk/gentle yoga if desired'
+                        activity: 'Complete rest or light walk/gentle yoga if desired. Focus on recovery, hydration, and preparation for the upcoming week.'
                     }
                 },
                 weeklySchedule: [
@@ -326,10 +272,12 @@
                         ]
                     },
                     {
-                        category: 'Core & Stability',
+                        category: 'Core & Lower Back',
                         exercises: [
+                            { name: 'Deadlifts', tips: 'Keep bar close to body, drive through heels, chest up, shoulders back' },
                             { name: 'Plank', tips: 'Straight line from head to heels, engage core, breathe normally' },
                             { name: 'Dead Bug', tips: 'Press lower back into floor, move opposite arm/leg slowly' },
+                            { name: 'Good Mornings', tips: 'Light weight, hip hinge movement, keep chest up' },
                             { name: 'Bird Dog', tips: 'Neutral spine, extend opposite arm/leg, hold for 2-3 seconds' }
                         ]
                     }
@@ -343,7 +291,6 @@
                 dashboard: document.getElementById('dashboard'),
                 program: document.getElementById('program'),
                 exercises: document.getElementById('exercises'),
-                hiit: document.getElementById('hiit'),
                 progress: document.getElementById('progress')
             };
 
@@ -401,56 +348,6 @@
                             <h4 class="font-bold text-lg mb-3 text-teal-700">💪 ${workout.strength.name}</h4>
                             <div class="mb-2 text-sm text-slate-600">Duration: ${workout.strength.duration}</div>
                             ${createExerciseList(workout.strength.exercises)}
-                        </div>
-                    `;
-                }
-
-                if (workout.finisher) {
-                    html += `
-                        <div class="workout-section">
-                            <h4 class="font-bold text-lg mb-3 text-teal-700">🎯 ${workout.finisher.name}</h4>
-                            <div class="mb-2 text-sm text-slate-600">Duration: ${workout.finisher.duration}</div>
-                            ${createExerciseList(workout.finisher.exercises)}
-                        </div>
-                    `;
-                }
-
-                if (workout.hiit) {
-                    html += `
-                        <div class="workout-section">
-                            <h4 class="font-bold text-lg mb-3 text-teal-700">🏃‍♂️ ${workout.hiit.name}</h4>
-                            <div class="mb-2 text-sm text-slate-600">Duration: ${workout.hiit.duration}</div>
-                            ${workout.hiit.protocol.map(phase => `
-                                <div class="bg-white p-3 rounded-lg border border-slate-200 mb-2">
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <span class="font-medium">${phase.phase}</span>
-                                            <div class="text-sm text-slate-600">${phase.details}</div>
-                                        </div>
-                                        <span class="text-teal-600 font-semibold">${phase.duration}</span>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    `;
-                }
-
-                if (workout.stretching) {
-                    html += `
-                        <div class="workout-section">
-                            <h4 class="font-bold text-lg mb-3 text-teal-700">🧘 ${workout.stretching.name}</h4>
-                            <div class="mb-2 text-sm text-slate-600">Duration: ${workout.stretching.duration}</div>
-                            ${workout.stretching.exercises.map(ex => `
-                                <div class="exercise-item">
-                                    <div>
-                                        <div class="font-semibold text-slate-800">${ex.ex}</div>
-                                        <div class="text-sm text-slate-600 mt-1">${ex.notes}</div>
-                                    </div>
-                                    <div class="text-right">
-                                        <div class="font-medium text-teal-700">${ex.duration}</div>
-                                    </div>
-                                </div>
-                            `).join('')}
                         </div>
                     `;
                 }
@@ -538,16 +435,13 @@
                                 <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold ${
                                     workout.type === 'Upper Body' ? 'bg-blue-100 text-blue-800' :
                                     workout.type === 'Lower Body' ? 'bg-green-100 text-green-800' :
-                                    workout.type === 'Cardio & Recovery' ? 'bg-purple-100 text-purple-800' :
+                                    workout.type === 'Core & Lower Back' ? 'bg-purple-100 text-purple-800' :
                                     'bg-gray-100 text-gray-800'
                                 }">${workout.type}</span>
                             </div>
                             <h4 class="font-semibold mb-2">${workout.name}</h4>
                             ${workout.warmup ? `<p class="text-sm text-slate-600 mb-1">• ${workout.warmup.duration} warm-up</p>` : ''}
                             ${workout.strength ? `<p class="text-sm text-slate-600 mb-1">• ${workout.strength.duration} strength training</p>` : ''}
-                            ${workout.finisher ? `<p class="text-sm text-slate-600 mb-1">• ${workout.finisher.duration} finisher</p>` : ''}
-                            ${workout.hiit ? `<p class="text-sm text-slate-600 mb-1">• ${workout.hiit.duration} HIIT</p>` : ''}
-                            ${workout.stretching ? `<p class="text-sm text-slate-600 mb-1">• ${workout.stretching.duration} stretching</p>` : ''}
                             ${workout.type === 'Recovery' ? `<p class="text-sm text-slate-600">${workout.activity}</p>` : ''}
                         </div>
                     `;
@@ -572,52 +466,6 @@
                         </div>
                     </details>
                 `).join('');
-            }
-
-            function renderHIITAndStretching() {
-                const hiitContainer = document.getElementById('hiit-container');
-                const stretchingContainer = document.getElementById('stretching-container');
-                const saturdayWorkout = appData.workouts.saturday;
-
-                hiitContainer.innerHTML = `
-                    <div>
-                        <h3 class="text-xl font-bold mb-4">🏃‍♂️ ${saturdayWorkout.hiit.name}</h3>
-                        <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                            <div class="mb-3 text-sm text-slate-600">Total Duration: ${saturdayWorkout.hiit.duration}</div>
-                            ${saturdayWorkout.hiit.protocol.map(phase => `
-                                <div class="bg-white p-3 rounded-lg border border-slate-200 mb-3 last:mb-0">
-                                    <div class="flex justify-between items-start">
-                                        <div>
-                                            <span class="font-semibold text-slate-800">${phase.phase}</span>
-                                            <div class="text-sm text-slate-600 mt-1">${phase.details}</div>
-                                        </div>
-                                        <span class="text-teal-600 font-semibold">${phase.duration}</span>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-
-                stretchingContainer.innerHTML = `
-                    <div>
-                        <h3 class="text-xl font-bold mb-4">🧘 ${saturdayWorkout.stretching.name}</h3>
-                        <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                            <div class="mb-3 text-sm text-slate-600">Total Duration: ${saturdayWorkout.stretching.duration}</div>
-                            ${saturdayWorkout.stretching.exercises.map(ex => `
-                                <div class="bg-white p-3 rounded-lg border border-slate-200 mb-3 last:mb-0">
-                                    <div class="flex justify-between items-start">
-                                        <div>
-                                            <span class="font-semibold text-slate-800">${ex.ex}</span>
-                                            <div class="text-sm text-slate-600 mt-1">${ex.notes}</div>
-                                        </div>
-                                        <span class="text-teal-600 font-semibold">${ex.duration}</span>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
             }
 
             function renderCalendar(year, month) {
@@ -665,7 +513,7 @@
 
                     if (workoutType === 'Upper Body') workoutIndicator = '💪';
                     else if (workoutType === 'Lower Body') workoutIndicator = '🦵';
-                    else if (workoutType === 'Cardio & Recovery') workoutIndicator = '🏃';
+                    else if (workoutType === 'Core & Lower Back') workoutIndicator = '🎯';
                     else workoutIndicator = '😌';
 
                     html += `<div class="${cellClasses}">
@@ -681,7 +529,7 @@
                     <div class="mt-6 flex flex-wrap justify-center gap-4 text-sm">
                         <div class="flex items-center gap-2"><span>💪</span><span>Upper Body</span></div>
                         <div class="flex items-center gap-2"><span>🦵</span><span>Lower Body</span></div>
-                        <div class="flex items-center gap-2"><span>🏃</span><span>HIIT + Stretching</span></div>
+                        <div class="flex items-center gap-2"><span>🎯</span><span>Core & Lower Back</span></div>
                         <div class="flex items-center gap-2"><span>😌</span><span>Rest Day</span></div>
                     </div>
                 `;
@@ -703,7 +551,6 @@
             renderTodayWorkout();
             renderWeeklySchedule();
             renderExerciseGuide();
-            renderHIITAndStretching();
             renderCalendar(calendarDate.getFullYear(), calendarDate.getMonth());
         });
     </script>
